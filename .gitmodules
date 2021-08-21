@@ -1,6 +1,0 @@
-[submodule "CMSIS_5"]
-	path = CMSIS_5
-	url = git@github.com:ARM-software/CMSIS_5.git
-[submodule "multiple_cmake_install"]
-	path = multiple_cmake_install
-	url = git@github.com:cmattatall/multiple_cmake_install.git
