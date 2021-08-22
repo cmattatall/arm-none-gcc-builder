@@ -188,9 +188,6 @@ elseif(TOOLCHAIN_GCC_PATH_NOT_FOUND)
 endif()
 
 
-# Once we have found our gcc executable
-#
-#
 get_filename_component(TOOLCHAIN_BINUTILS_DIR ${TOOLCHAIN_GCC_PATH} DIRECTORY)
 get_filename_component(TOOLCHAIN_ROOT_DIR ${TOOLCHAIN_BINUTILS_DIR} DIRECTORY)
 set(TOOLCHAIN_SYSROOT_DIR ${TOOLCHAIN_ROOT_DIR}/${TOOLCHAIN_PREFIX}) # TODO: check if sysroot is indeed a directory
@@ -293,62 +290,6 @@ mark_as_advanced(CMAKE_ASM_FLAGS_INIT)
 mark_as_advanced(CMAKE_C_FLAGS_INIT)
 mark_as_advanced(CMAKE_CXX_FLAGS_INIT)
 
-if(UNIX AND NOT APPLE)
-
-    # Add include sysroot/include to IDIRS if exists
-    set(TOOLCHAIN_ROOT_INCLUDE_DIR ${TOOLCHAIN_SYSROOT_DIR}/include)
-    if(EXISTS ${TOOLCHAIN_ROOT_INCLUDE_DIR})
-        if(IS_DIRECTORY ${TOOLCHAIN_ROOT_INCLUDE_DIR})
-            include_directories(${TOOLCHAIN_ROOT_INCLUDE_DIR})
-        endif(IS_DIRECTORY ${TOOLCHAIN_ROOT_INCLUDE_DIR})
-    endif(EXISTS ${TOOLCHAIN_ROOT_INCLUDE_DIR})
-    mark_as_advanced(TOOLCHAIN_ROOT_INCLUDE_DIR)
-
-    # Add sysroot/usr/include to IDIRS if exists
-    set(TOOLCHAIN_USR_INCLUDE_DIR ${TOOLCHAIN_USR_DIR}/include)
-    if(EXISTS ${TOOLCHAIN_USR_INCLUDE_DIR})
-        if(IS_DIRECTORY ${TOOLCHAIN_USR_INCLUDE_DIR})
-            include_directories(${TOOLCHAIN_USR_INCLUDE_DIR})
-        endif(IS_DIRECTORY ${TOOLCHAIN_USR_INCLUDE_DIR})
-    endif(EXISTS ${TOOLCHAIN_USR_INCLUDE_DIR})
-    mark_as_advanced(TOOLCHAIN_USR_INCLUDE_DIR)
-
-
-    # Add sysroot/usr/local/include to IDIRS if exists
-    set(TOOLCHAIN_USR_LOCAL_INCLUDE_DIR ${TOOLCHAIN_USR_DIR}/local/include)
-    if(EXISTS ${TOOLCHAIN_USR_LOCAL_INCLUDE_DIR})
-        if(IS_DIRECTORY ${TOOLCHAIN_USR_LOCAL_INCLUDE_DIR})
-            include_directories(${TOOLCHAIN_USR_LOCAL_INCLUDE_DIR})
-        endif(IS_DIRECTORY ${TOOLCHAIN_USR_LOCAL_INCLUDE_DIR})
-    endif(EXISTS ${TOOLCHAIN_USR_LOCAL_INCLUDE_DIR})
-    mark_as_advanced(TOOLCHAIN_USR_LOCAL_INCLUDE_DIR)
-
-    # Add sysroot/lib to link LDIRS if exists
-    set(TOOLCHAIN_LIB_DIR ${TOOLCHAIN_SYSROOT_DIR}/lib/)
-    if(EXISTS ${TOOLCHAIN_LIB_DIR})
-        if(IS_DIRECTORY ${TOOLCHAIN_LIB_DIR})
-            link_directories(${TOOLCHAIN_LIB_DIR})
-        endif(IS_DIRECTORY ${TOOLCHAIN_LIB_DIR})
-    endif(EXISTS ${TOOLCHAIN_LIB_DIR})
-
-    # Add sysroot/usr/lib to link LDIRS if exists
-    set(TOOLCHAIN_USR_LIB_DIR ${TOOLCHAIN_USR_DIR}/lib/)
-    if(EXISTS ${TOOLCHAIN_USR_LIB_DIR})
-        if(IS_DIRECTORY ${TOOLCHAIN_USR_LIB_DIR})
-            link_directories(${TOOLCHAIN_USR_LIB_DIR})
-        endif(IS_DIRECTORY ${TOOLCHAIN_USR_LIB_DIR})
-    endif(EXISTS ${TOOLCHAIN_USR_LIB_DIR})
-
-    # Add sysroot/usr/local/lib to link LDIRS if exists
-    set(TOOLCHAIN_USR_LOCAL_LIB_DIR ${TOOLCHAIN_USR_DIR}/local/lib/)
-    if(EXISTS ${TOOLCHAIN_USR_LOCAL_LIB_DIR})
-        if(IS_DIRECTORY ${TOOLCHAIN_USR_LOCAL_LIB_DIR})
-            link_directories(${TOOLCHAIN_USR_LOCAL_LIB_DIR})
-        endif(IS_DIRECTORY ${TOOLCHAIN_USR_LOCAL_LIB_DIR})
-    endif(EXISTS ${TOOLCHAIN_USR_LOCAL_LIB_DIR})
-
-endif(UNIX AND NOT APPLE)
-
 # This supports custom builds of gcc that may not use the default values 
 # provided by autotools when it was built. 
 #
@@ -357,6 +298,150 @@ set(CMAKE_INSTALL_RPATH ${TOOLCHAIN_USR_DIR})
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 
+
+#-------------------------------------------------------------------------------
+# Prints the section sizes
+#-------------------------------------------------------------------------------
+function(print_section_sizes TARGET)
+    add_custom_command(
+        TARGET ${TARGET} 
+        POST_BUILD 
+        COMMAND ${CMAKE_SIZE} ${TARGET}
+    )
+endfunction(create_hex_output TARGET)
+
+
+#-------------------------------------------------------------------------------
+# Creates output in hex format
+#-------------------------------------------------------------------------------
+function(create_hex_output TARGET)
+    if(TARGET ${TARGET})
+        add_custom_target(
+            ${TARGET}.hex ALL 
+            DEPENDS ${TARGET} 
+            COMMAND ${CMAKE_OBJCOPY} -Oihex ${TARGET} ${TARGET}.hex
+        )
+    else()
+        message(FATAL_ERROR "Target ${TARGET} is not a target. function ${CMAKE_CURRENT_FUNCTION_} cannot proceed.")
+    endif(TARGET ${TARGET})
+endfunction(create_hex_output TARGET)
+
+
+#-------------------------------------------------------------------------------
+# Creates output in binary format
+#-------------------------------------------------------------------------------
+function(create_bin_output TARGET)
+    if(TARGET ${TARGET})
+
+        add_custom_target(
+            ${TARGET}.bin ALL 
+            DEPENDS ${TARGET} 
+            COMMAND ${CMAKE_OBJCOPY} -Obinary ${TARGET} ${TARGET}.bin
+        )
+    else()
+        message(FATAL_ERROR "Target ${TARGET} is not a target. function ${CMAKE_CURRENT_FUNCTION_} cannot proceed.")
+    endif(TARGET ${TARGET})
+endfunction(create_bin_output TARGET)
+
+
+function(create_lss_output TARGET)
+    if(TARGET ${TARGET})
+
+        unset(${TARGET}_IS_VALID)
+        get_target_property(TARGET_TYPE ${TARGET} TYPE)
+        if(TARGET_TYPE STREQUAL STATIC_LIBRARY)
+            get_target_property(OUTPUT_DIRECTORY ${TARGET} ARCHIVE_OUTPUT_DIRECTORY)
+            if(OUTPUT_DIRECTORY)
+                set(${TARGET}_IS_VALID 1)
+            else()
+                message(WARNING "Error. OUTPUT_DIRECTORY for target: ${TARGET}\
+                                 with type: ${TARGET_TYPE} is empty.\
+                                 Queried property: ARCHIVE_OUTPUT_DIRECTORY"
+                )
+            endif(OUTPUT_DIRECTORY)
+        elseif(TARGET_TYPE STREQUAL SHARED_LIBRARY)
+            get_target_property(OUTPUT_DIRECTORY ${TARGET} ARCHIVE_OUTPUT_DIRECTORY)
+            if(OUTPUT_DIRECTORY)
+                set(${TARGET}_IS_VALID 1)
+            else()
+                message(WARNING "Error. OUTPUT_DIRECTORY for target: ${TARGET}\
+                                 with type: ${TARGET_TYPE} is empty.\
+                                 Queried property: ARCHIVE_OUTPUT_DIRECTORY"
+                )
+            endif(OUTPUT_DIRECTORY)
+        elseif(TARGET_TYPE STREQUAL MODULE_LIBRARY)
+            get_target_property(OUTPUT_DIRECTORY ${TARGET} ARCHIVE_OUTPUT_DIRECTORY)
+            if(OUTPUT_DIRECTORY)
+                set(${TARGET}_IS_VALID 1)
+            else()
+                message(WARNING "Error. OUTPUT_DIRECTORY for target: ${TARGET}\
+                                 with type: ${TARGET_TYPE} is empty.\
+                                Queried property: ARCHIVE_OUTPUT_DIRECTORY"
+                )
+            endif(OUTPUT_DIRECTORY)
+        elseif(TARGET_TYPE STREQUAL OBJECT_LIBRARY)
+            get_target_property(OUTPUT_DIRECTORY ${TARGET} ARCHIVE_OUTPUT_DIRECTORY)
+            if(OUTPUT_DIRECTORY)
+                set(${TARGET}_IS_VALID 1)
+            else()
+                message(WARNING "Error. OUTPUT_DIRECTORY for target: ${TARGET}\
+                                with type: ${TARGET_TYPE} is empty.\
+                                Queried property: ARCHIVE_OUTPUT_DIRECTORY"
+                )
+            endif(OUTPUT_DIRECTORY)
+        elseif(TARGET_TYPE STREQUAL INTERFACE_LIBRARY)
+            get_target_property(OUTPUT_DIRECTORY ${TARGET} ARCHIVE_OUTPUT_DIRECTORY)
+            if(OUTPUT_DIRECTORY)
+                set(${TARGET}_IS_VALID 1)
+            else()
+                message(WARNING "Error. OUTPUT_DIRECTORY for target: ${TARGET}\
+                                 with type: ${TARGET_TYPE} is empty.\
+                                 Queried property: ARCHIVE_OUTPUT_DIRECTORY"
+                )
+            endif(OUTPUT_DIRECTORY)
+        else(TARGET_TYPE STREQUAL EXECUTABLE)
+            get_target_property(OUTPUT_DIRECTORY ${TARGET} RUNTIME_OUTPUT_DIRECTORY)
+            if(OUTPUT_DIRECTORY)
+                set(${TARGET}_IS_VALID 1)
+            else()
+                message(WARNING "Error. OUTPUT_DIRECTORY for target: ${TARGET}\
+                                 with type: ${TARGET_TYPE} is empty.\
+                                 Queried property: RUNTIME_OUTPUT_DIRECTORY"
+                )
+            endif(OUTPUT_DIRECTORY)
+        else(TARGET_TYPE STREQUAL UTILITY)
+            # This is for cmake's internal target types (and for targets added with add_custom_target)
+            # We won't do anything because compiled files are not produced from these targets
+        endif()
+
+        if(${TARGET}_IS_VALID)
+            add_custom_target(
+                ${TARGET}.lss ALL 
+                DEPENDS ${TARGET} 
+                COMMAND ${CMAKE_OBJDUMP} -xh ${OUTPUT_DIRECTORY}/${TARGET} > "${OUTPUT_DIRECTORY}/${LIB_NAME_BASE}.lss"
+                VERBATIM
+                add_custom_command()
+            )
+        else()
+            message(WARNING "Target: ${TARGET} is not valid for generating listfile output.")
+        endif(${TARGET}_IS_VALID)
+    else()
+        message(FATAL_ERROR "Target ${TARGET} is not a target. function ${CMAKE_CURRENT_FUNCTION_} cannot proceed.")
+    endif(TARGET ${TARGET})
+endfunction(create_lss_output TARGET)
+
+#[[
+add_custom_command( 
+            TARGET ${library}_postbuild
+            POST_BUILD
+            DEPENDS ALL
+            COMMENT "Generating lss file for target: ${library}"
+            COMMAND ${CMAKE_OBJDUMP} -xh "${OUTPUT_DIRECTORY}/${LIB_NAME}" > "${OUTPUT_DIRECTORY}/${LIB_NAME_BASE}.lss"
+        )
+#]]
+
+
+#[[
 if(NOT COMMAND _add_executable)
 function(add_executable exe)
     _add_executable(${exe} ${ARGN})
@@ -377,46 +462,55 @@ function(add_executable exe)
         # Custom targets are always considered out of date so the postbuild tasks will always run
         add_custom_target(${exe}_postbuild ALL DEPENDS ${exe})
 
-        add_custom_command( 
+        add_custom_command(
             TARGET ${exe}_postbuild
             POST_BUILD
             DEPENDS ${exe}
             COMMENT "Built executable target: \"${exe}\" with the following size:"
             COMMAND ${CMAKE_SIZE} -B "${OUTPUT_DIRECTORY}/${EXE_NAME}"
+            VERBATIM
         )
 
         # Generate hex file from the ELF
-        add_custom_command( 
+        add_custom_command(
             TARGET ${exe}_postbuild
             POST_BUILD
             DEPENDS ${exe}
             COMMENT "Producing a hex format for target: ${exe}"
             COMMAND ${CMAKE_OBJCOPY} -O ihex "${OUTPUT_DIRECTORY}/${EXE_NAME}" "${OUTPUT_DIRECTORY}/${exe}.hex"
+            VERBATIM
         )
 
         # Generate binary file from the ELF
-        add_custom_command( 
+        add_custom_command(
             TARGET ${exe}_postbuild
             POST_BUILD
             DEPENDS ${exe}
             COMMENT "Producing a binary format for target: ${exe}"
             COMMAND ${CMAKE_OBJCOPY} -O binary "${OUTPUT_DIRECTORY}/${EXE_NAME}" "${OUTPUT_DIRECTORY}/${exe}.bin"
+            VERBATIM
         )
 
         # Generate section list file from the ELF
-        add_custom_command( 
+        add_custom_command(
             TARGET ${exe}_postbuild
             POST_BUILD
             DEPENDS ${exe}
             COMMENT "Generating lss file for target: ${exe}"
             COMMAND ${CMAKE_OBJDUMP} -xh "${OUTPUT_DIRECTORY}/${EXE_NAME}" > "${OUTPUT_DIRECTORY}/${exe}.lss"
+            VERBATIM
         )
 
     endif(CMAKE_CROSSCOMPILING)
 endfunction(add_executable exe)
 endif(NOT COMMAND _add_executable)
+#]]
 
 
+
+
+
+#[[
 if(NOT COMMAND _add_library)
 function(add_library library)
     _add_library(${library} ${ARGN})
@@ -447,8 +541,6 @@ function(add_library library)
         set(LIB_NAME_BASE "${PREFIX}${OUTPUT_NAME}")
         set(LIB_NAME "${LIB_NAME_BASE}${SUFFIX}")
 
-        message("OUTPUT_DIRECTORY for target ${library} = ${OUTPUT_DIRECTORY}")
-
         set_target_properties(${library} PROPERTIES SUFFIX "${SUFFIX}")
         set_target_properties(${library} PROPERTIES OUTPUT_NAME "${OUTPUT_NAME}")
 
@@ -460,26 +552,28 @@ function(add_library library)
         # Custom targets are always considered out of date so the postbuild tasks will always run
         add_custom_target(${library}_postbuild ALL DEPENDS ${library})
 
-        add_custom_command( 
+        add_custom_command(
             TARGET ${library}_postbuild
             POST_BUILD
             DEPENDS ${library}
             COMMENT "Built library target: \"${library}\" with the following size:"
             COMMAND ${CMAKE_SIZE} -B "${OUTPUT_DIRECTORY}/${LIB_NAME}"
+            VERBATIM
         )
 
-        add_custom_command( 
+        add_custom_command(
             TARGET ${library}_postbuild
             POST_BUILD
             DEPENDS ALL
             COMMENT "Generating lss file for target: ${library}"
             COMMAND ${CMAKE_OBJDUMP} -xh "${OUTPUT_DIRECTORY}/${LIB_NAME}" > "${OUTPUT_DIRECTORY}/${LIB_NAME_BASE}.lss"
+            VERBATIM
         )
 
     endif(CMAKE_CROSSCOMPILING)
 endfunction(add_library library)
 endif(NOT COMMAND _add_library)
-
+#]]
 
 # The hacky workaround so that we can check if this is the very first time
 # the toolchain file is being processed and act accordingly.
