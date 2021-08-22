@@ -5,7 +5,7 @@ Project to create a customizable build system for arm-based micros that runs on 
 # Dependencies 
 
 - Docker (20.10.5 or greater)   https://www.docker.com/products/docker-desktop
-- Python (3.6 or or greater)    https://www.python.org/downloads/ ( or in a unix environment you can just do something like `# apt-get update && apt-get install -y python3`
+- Python (3.6 or or greater)    https://www.python.org/downloads/
 - CMake  (3.21.0 or greater)    https://cmake.org/download/
 
 # Usage
