@@ -21,9 +21,9 @@ git_clone(
 )
 
 
-# include(cmake/setup/test-framework.cmake)
-# include(cmake/setup/configure-cmsis.cmake)
-# include(cmake/setup/configure-svd.cmake)
+include(cmake/setup/test-framework.cmake)
+include(cmake/setup/configure-cmsis.cmake)
+include(cmake/setup/configure-svd.cmake)
 
 
 
