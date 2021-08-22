@@ -5,5 +5,4 @@ RUN apt-get update && \
         wget \
         curl \
         build-essential \
-        gcc-arm-none-eabi \
-        g++-arm-none-eabi
+        gcc-arm-none-eabi
