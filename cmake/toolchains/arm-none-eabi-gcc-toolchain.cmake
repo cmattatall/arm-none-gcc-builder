@@ -24,29 +24,9 @@ set(TOOLCHAIN_PREFIX arm-none-eabi)
 
 
 ################################################################################
-# TARGET OPTIONS: CHANGE THESE BASED ON YOUR EMBEDDED TARGET
-################################################################################
-# -mlittle-endian      : Target endianness is little
-# -mthumb              : Only generate thumb code, not arm
-# -mcpu=cortex-m4      : Specifies the cpu. 
-# -mfloat-abi=hard     : Specified the floating point ABI used
-# -mfpu=fpv4-sp-d16    : Specifies the FPU architecture used 
-set(TARGET_ARCH_OPTIONS 
-    "                    \
-    -mlittle-endian      \
-    -mthumb              \
-    -mcpu=cortex-m4      \
-    -mfloat-abi=hard     \
-    -mfpu=fpv4-sp-d16    \
-    "
-)
-
-
-################################################################################
 # LINKER OPTIONS: CHANGE THESE BASED ON YOUR EMBEDDED TARGET
 ################################################################################
-set(TARGET_LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/stm32f411-flash.ld")
-set(TARGET_LINKER_OPTIONS 
+set(CODEGEN_OPTIONS 
     "                       \
     -mthumb-interwork       \
     -ffreestanding          \
@@ -75,7 +55,6 @@ set(TOOLCHAIN_OBJCOPY_NAME ${TOOLCHAIN_PREFIX}-objcopy${CMAKE_EXECUTABLE_SUFFIX}
 set(TOOLCHAIN_OBJDUMP_NAME ${TOOLCHAIN_PREFIX}-objdump${CMAKE_EXECUTABLE_SUFFIX})
 set(TOOLCHAIN_SIZE_NAME ${TOOLCHAIN_PREFIX}-size${CMAKE_EXECUTABLE_SUFFIX})
 set(TOOLCHAIN_GDB_NAME ${TOOLCHAIN_PREFIX}-gdb${CMAKE_EXECUTABLE_SUFFIX})
-set(TOOLCHAIN_STRIP_NAME ${TOOLCHAIN_PREFIX}-strip${CMAKE_EXECUTABLE_SUFFIX})
 
 # Print configuration info to callee
 if(NOT DEFINED ENV{TOOLCHAIN_PROCESSED})
@@ -265,12 +244,6 @@ find_program(
     REQUIRED
 )
 
-find_program(
-    CMAKE_STRIP 
-    NAMES ${TOOLCHAIN_STRIP_NAME}
-    HINTS ${TOOLCHAIN_BINUTILS_SEARCH_HINTS} 
-    REQUIRED
-)
 
 # Note that GDB may not necessarily be required because we could be semihosting
 # (or maybe we just don't care about debugging on our platform or something)
@@ -281,10 +254,10 @@ find_program(
 )
 
 # Configure initial compiler flags
-set(CMAKE_ASM_FLAGS_INIT "${TARGET_ARCH_OPTIONS} ${TARGET_LINKER_OPTIONS}")
-set(CMAKE_C_FLAGS_INIT "${TARGET_ARCH_OPTIONS} ${TARGET_LINKER_OPTIONS}")
-set(CMAKE_CXX_FLAGS_INIT "${TARGET_ARCH_OPTIONS} ${TARGET_LINKER_OPTIONS} -fno-rtti -fno-exceptions")
-set(CMAKE_EXE_LINKER_FLAGS_INIT "-Wl,--relax,--gc-sections,-T,${TARGET_LINKER_SCRIPT}")
+set(CMAKE_ASM_FLAGS_INIT "${CODEGEN_OPTIONS}")
+set(CMAKE_C_FLAGS_INIT "${CODEGEN_OPTIONS}")
+set(CMAKE_CXX_FLAGS_INIT "${CODEGEN_OPTIONS} -fno-rtti -fno-exceptions")
+set(CMAKE_EXE_LINKER_FLAGS_INIT "-Wl,--relax,--gc-sections")
 
 mark_as_advanced(CMAKE_ASM_FLAGS_INIT)
 mark_as_advanced(CMAKE_C_FLAGS_INIT)
@@ -308,7 +281,7 @@ function(print_section_sizes TARGET)
         POST_BUILD 
         COMMAND ${CMAKE_SIZE} ${TARGET}
     )
-endfunction(create_hex_output TARGET)
+endfunction()
 
 
 #-------------------------------------------------------------------------------
@@ -324,7 +297,7 @@ function(create_hex_output TARGET)
     else()
         message(FATAL_ERROR "Target ${TARGET} is not a target. function ${CMAKE_CURRENT_FUNCTION_} cannot proceed.")
     endif(TARGET ${TARGET})
-endfunction(create_hex_output TARGET)
+endfunction()
 
 
 #-------------------------------------------------------------------------------
@@ -341,7 +314,7 @@ function(create_bin_output TARGET)
     else()
         message(FATAL_ERROR "Target ${TARGET} is not a target. function ${CMAKE_CURRENT_FUNCTION_} cannot proceed.")
     endif(TARGET ${TARGET})
-endfunction(create_bin_output TARGET)
+endfunction()
 
 
 function(create_lss_output TARGET)
@@ -349,70 +322,72 @@ function(create_lss_output TARGET)
 
         unset(${TARGET}_IS_VALID)
         get_target_property(TARGET_TYPE ${TARGET} TYPE)
-        if(TARGET_TYPE STREQUAL STATIC_LIBRARY)
-            get_target_property(OUTPUT_DIRECTORY ${TARGET} ARCHIVE_OUTPUT_DIRECTORY)
-            if(OUTPUT_DIRECTORY)
-                set(${TARGET}_IS_VALID 1)
+        if(TARGET_TYPE)
+            if(TARGET_TYPE STREQUAL STATIC_LIBRARY)
+                get_target_property(OUTPUT_DIRECTORY ${TARGET} ARCHIVE_OUTPUT_DIRECTORY)
+                if(OUTPUT_DIRECTORY)
+                    set(${TARGET}_IS_VALID 1)
+                else()
+                    message(WARNING "Error. OUTPUT_DIRECTORY for target: ${TARGET}\
+                                    with type: ${TARGET_TYPE} is empty.\
+                                    Queried property: ARCHIVE_OUTPUT_DIRECTORY")
+                endif(OUTPUT_DIRECTORY)
+            elseif(TARGET_TYPE STREQUAL SHARED_LIBRARY)
+                get_target_property(OUTPUT_DIRECTORY ${TARGET} ARCHIVE_OUTPUT_DIRECTORY)
+                if(OUTPUT_DIRECTORY)
+                    set(${TARGET}_IS_VALID 1)
+                else()
+                    message(WARNING "Error. OUTPUT_DIRECTORY for target: ${TARGET}\
+                                    with type: ${TARGET_TYPE} is empty.\
+                                    Queried property: ARCHIVE_OUTPUT_DIRECTORY")
+                endif(OUTPUT_DIRECTORY)
+            elseif(TARGET_TYPE STREQUAL MODULE_LIBRARY)
+                get_target_property(OUTPUT_DIRECTORY ${TARGET} ARCHIVE_OUTPUT_DIRECTORY)
+                if(OUTPUT_DIRECTORY)
+                    set(${TARGET}_IS_VALID 1)
+                else()
+                    message(WARNING "Error. OUTPUT_DIRECTORY for target: ${TARGET}\
+                                    with type: ${TARGET_TYPE} is empty.\
+                                    Queried property: ARCHIVE_OUTPUT_DIRECTORY")
+                endif(OUTPUT_DIRECTORY)
+            elseif(TARGET_TYPE STREQUAL OBJECT_LIBRARY)
+                get_target_property(OUTPUT_DIRECTORY ${TARGET} ARCHIVE_OUTPUT_DIRECTORY)
+                if(OUTPUT_DIRECTORY)
+                    set(${TARGET}_IS_VALID 1)
+                else()
+                    message(WARNING "Error. OUTPUT_DIRECTORY for target: ${TARGET}\
+                                    with type: ${TARGET_TYPE} is empty.\
+                                    Queried property: ARCHIVE_OUTPUT_DIRECTORY")
+                endif(OUTPUT_DIRECTORY)
+            elseif(TARGET_TYPE STREQUAL INTERFACE_LIBRARY)
+                get_target_property(OUTPUT_DIRECTORY ${TARGET} ARCHIVE_OUTPUT_DIRECTORY)
+                if(OUTPUT_DIRECTORY)
+                    set(${TARGET}_IS_VALID 1)
+                else()
+                    message(WARNING "Error. OUTPUT_DIRECTORY for target: ${TARGET}\
+                                    with type: ${TARGET_TYPE} is empty.\
+                                    Queried property: ARCHIVE_OUTPUT_DIRECTORY")
+                endif(OUTPUT_DIRECTORY)
+            elseif(TARGET_TYPE STREQUAL EXECUTABLE)
+                get_target_property(OUTPUT_DIRECTORY ${TARGET} RUNTIME_OUTPUT_DIRECTORY)
+                if(OUTPUT_DIRECTORY)
+                    set(${TARGET}_IS_VALID 1)
+                else()
+                    message(WARNING "Error. OUTPUT_DIRECTORY for target: ${TARGET}\
+                                    with type: ${TARGET_TYPE} is empty.\
+                                    Queried property: RUNTIME_OUTPUT_DIRECTORY")
+                endif(OUTPUT_DIRECTORY)
+            elseif(TARGET_TYPE STREQUAL UTILITY)
+                # This is for cmake's internal target types (and for targets added with add_custom_target)
+                # We won't do anything because compiled files are not produced from these targets
             else()
-                message(WARNING "Error. OUTPUT_DIRECTORY for target: ${TARGET}\
-                                 with type: ${TARGET_TYPE} is empty.\
-                                 Queried property: ARCHIVE_OUTPUT_DIRECTORY"
-                )
-            endif(OUTPUT_DIRECTORY)
-        elseif(TARGET_TYPE STREQUAL SHARED_LIBRARY)
-            get_target_property(OUTPUT_DIRECTORY ${TARGET} ARCHIVE_OUTPUT_DIRECTORY)
-            if(OUTPUT_DIRECTORY)
-                set(${TARGET}_IS_VALID 1)
-            else()
-                message(WARNING "Error. OUTPUT_DIRECTORY for target: ${TARGET}\
-                                 with type: ${TARGET_TYPE} is empty.\
-                                 Queried property: ARCHIVE_OUTPUT_DIRECTORY"
-                )
-            endif(OUTPUT_DIRECTORY)
-        elseif(TARGET_TYPE STREQUAL MODULE_LIBRARY)
-            get_target_property(OUTPUT_DIRECTORY ${TARGET} ARCHIVE_OUTPUT_DIRECTORY)
-            if(OUTPUT_DIRECTORY)
-                set(${TARGET}_IS_VALID 1)
-            else()
-                message(WARNING "Error. OUTPUT_DIRECTORY for target: ${TARGET}\
-                                 with type: ${TARGET_TYPE} is empty.\
-                                Queried property: ARCHIVE_OUTPUT_DIRECTORY"
-                )
-            endif(OUTPUT_DIRECTORY)
-        elseif(TARGET_TYPE STREQUAL OBJECT_LIBRARY)
-            get_target_property(OUTPUT_DIRECTORY ${TARGET} ARCHIVE_OUTPUT_DIRECTORY)
-            if(OUTPUT_DIRECTORY)
-                set(${TARGET}_IS_VALID 1)
-            else()
-                message(WARNING "Error. OUTPUT_DIRECTORY for target: ${TARGET}\
-                                with type: ${TARGET_TYPE} is empty.\
-                                Queried property: ARCHIVE_OUTPUT_DIRECTORY"
-                )
-            endif(OUTPUT_DIRECTORY)
-        elseif(TARGET_TYPE STREQUAL INTERFACE_LIBRARY)
-            get_target_property(OUTPUT_DIRECTORY ${TARGET} ARCHIVE_OUTPUT_DIRECTORY)
-            if(OUTPUT_DIRECTORY)
-                set(${TARGET}_IS_VALID 1)
-            else()
-                message(WARNING "Error. OUTPUT_DIRECTORY for target: ${TARGET}\
-                                 with type: ${TARGET_TYPE} is empty.\
-                                 Queried property: ARCHIVE_OUTPUT_DIRECTORY"
-                )
-            endif(OUTPUT_DIRECTORY)
-        else(TARGET_TYPE STREQUAL EXECUTABLE)
-            get_target_property(OUTPUT_DIRECTORY ${TARGET} RUNTIME_OUTPUT_DIRECTORY)
-            if(OUTPUT_DIRECTORY)
-                set(${TARGET}_IS_VALID 1)
-            else()
-                message(WARNING "Error. OUTPUT_DIRECTORY for target: ${TARGET}\
-                                 with type: ${TARGET_TYPE} is empty.\
-                                 Queried property: RUNTIME_OUTPUT_DIRECTORY"
-                )
-            endif(OUTPUT_DIRECTORY)
-        else(TARGET_TYPE STREQUAL UTILITY)
-            # This is for cmake's internal target types (and for targets added with add_custom_target)
-            # We won't do anything because compiled files are not produced from these targets
-        endif()
+                message(WARNING "Unsupported type: ${TARGET_TYPE} for target: \
+                                ${TARGET} in function ${CMAKE_CURRENT_FUNCTION}")
+            endif()
+        else()
+            message(WARNING "Property TYPE for target: ${TARGET} does not exist")
+        endif(TARGET_TYPE)
+        
 
         if(${TARGET}_IS_VALID)
             add_custom_target(
@@ -428,7 +403,7 @@ function(create_lss_output TARGET)
     else()
         message(FATAL_ERROR "Target ${TARGET} is not a target. function ${CMAKE_CURRENT_FUNCTION_} cannot proceed.")
     endif(TARGET ${TARGET})
-endfunction(create_lss_output TARGET)
+endfunction()
 
 #[[
 add_custom_command( 
