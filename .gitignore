@@ -68,7 +68,6 @@ _deps
 
 ## PROJECT SPECIFIC STUFF ##
 build
-extern
 
 
 # Weird things happen with CMake module FetchContent...
