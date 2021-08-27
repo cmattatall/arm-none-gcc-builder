@@ -8,13 +8,13 @@ set(FETCHCONTENT_BASE_DIR ${PROJECT_BINARY_DIR}/fetched_content)
 
 if(CMAKE_CROSSCOMPILING)
 
-    include(${CMAKE_CURRENT_LIST_DIR}/fetch-cmsis.cmake)
-    include(${CMAKE_CURRENT_LIST_DIR}/fetch-svd.cmake)
-    include(${CMAKE_CURRENT_LIST_DIR}/fetch-stm32cube.cmake)
+    include(${CMAKE_CURRENT_LIST_DIR}/fetch-content/fetch-cmsis.cmake)
+    include(${CMAKE_CURRENT_LIST_DIR}/fetch-content/fetch-svd.cmake)
+    include(${CMAKE_CURRENT_LIST_DIR}/fetch-content/fetch-stm32cube.cmake)
 
 else()
 
-    include(${CMAKE_CURRENT_LIST_DIR}/fetch-test-frameworks.cmake)
+    include(${CMAKE_CURRENT_LIST_DIR}/fetch-content/fetch-test-frameworks.cmake)
 
 endif(CMAKE_CROSSCOMPILING)
 
