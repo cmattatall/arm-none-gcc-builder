@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.21)
 
+# NOTES ON CREATING A VERSION HEADER (for future reference)
+# https://cmake.org/pipermail/cmake/2010-July/038015.html
+
 project(portable-firmware
     VERSION 0.1.0
     LANGUAGES CXX C ASM
