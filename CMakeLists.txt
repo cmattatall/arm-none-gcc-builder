@@ -19,4 +19,7 @@ endif(CMAKE_CROSSCOMPILING)
 
 
 get_all_targets(all_targets)
-message("All targets: ${all_targets}")
+message("listing all targets:")
+foreach(target ${all_targets})
+    message("${target}")
+endforeach(target ${all_targets})
