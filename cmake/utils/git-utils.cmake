@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.21)
 find_package(Git REQUIRED)
 
 if(IS_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cmake_git_clone)

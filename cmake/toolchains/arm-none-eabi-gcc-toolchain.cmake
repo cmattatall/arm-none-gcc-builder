@@ -9,7 +9,7 @@
 # Maintainer: Carl Mattatall (cmattatall2@gmail.com)
 # Github: cmattatall
 ################################################################################
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.21)
 
 
 # TODO: Refactor the target-specific stuff into an abstract and injectible

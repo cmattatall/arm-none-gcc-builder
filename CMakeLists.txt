@@ -1,18 +1,16 @@
-# Commented out until some higher-level project structre stuff is figured out
-#[[
-cmake_minimum_required(VERSION 3.20)
-include(ExternalProject)
-include(FetchContent)
+cmake_minimum_required(VERSION 3.21)
 
-option(BUILD_TESTS "Option to build the tests" OFF)
-option(BUILD_CROSS "Option to cross-compile" OFF)
+project(portable-firmware
+    VERSION 0.1.0
+    LANGUAGES CXX C ASM
+)
 
-find_package(Git REQUIRED)
-include(cmake/utils/git-utils.cmake)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/cmake/fetch-content)
 
-project(arm-none-gcc-builder)
+add_subdirectory(application)
 
-add_subdirectory(cmake/setup)
+if(CMAKE_CROSSCOMPILING)
+    
+    add_subdirectory(target)
 
-
-#]]
+endif(CMAKE_CROSSCOMPILING)
