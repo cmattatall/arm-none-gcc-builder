@@ -78,7 +78,6 @@ if(NOT DEFINED ENV{TOOLCHAIN_PROCESSED})
     message("TOOLCHAIN_OBJDUMP_NAME ............ ${TOOLCHAIN_OBJDUMP_NAME}")
     message("TOOLCHAIN_SIZE_NAME ............... ${TOOLCHAIN_SIZE_NAME}")
     message("TOOLCHAIN_GDB_NAME ................ ${TOOLCHAIN_GDB_NAME}")
-    message("TOOLCHAIN_STRIP_NAME .............. ${TOOLCHAIN_STRIP_NAME}")
     message("") 
 
     mark_as_advanced(TOOLCHAIN_PREFIX)
