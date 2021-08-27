@@ -22,4 +22,9 @@ You can either build the docker image with `$docker build .` and use it to compi
 
 # Building
 
+
+# Debugging
+
+OpenOCD is used for debugging
+
 # Tests
