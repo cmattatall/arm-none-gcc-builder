@@ -5,7 +5,9 @@ project(portable-firmware
     LANGUAGES CXX C ASM
 )
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/cmake/fetch-content)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/fetch-content.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/utils.cmake)
+
 
 add_subdirectory(application)
 
@@ -14,3 +16,7 @@ if(CMAKE_CROSSCOMPILING)
     add_subdirectory(target)
 
 endif(CMAKE_CROSSCOMPILING)
+
+
+get_all_targets(all_targets)
+message("All targets: ${all_targets}")
