@@ -63,13 +63,14 @@ execute_process(
 )
 
 if(NOT DOT_EXECUTABLE_NOT_FOUND)
-    if(NOT TARGET graphviz)
-        add_custom_target(graphviz ALL
+    set(GRAPHVIZ_IMAGE_TARGET graphviz)
+    if(NOT TARGET ${GRAPHVIZ_IMAGE_TARGET})
+        add_custom_target(${GRAPHVIZ_IMAGE_TARGET} ALL
             COMMAND ${CMAKE_COMMAND} "--graphviz=graph.dot" .
             COMMAND ${DOT_EXECUTABLE} -Tpng graph.dot -o ${PROJECT_NAME}_software_arch.png
             WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
         )
-    endif(NOT TARGET graphviz)
+    endif(NOT TARGET ${GRAPHVIZ_IMAGE_TARGET})
 else()
     message(WARNING "Cannot create graphviz visualization of software architecture because ${DOT_EXECUTABLE} not found")
 endif(NOT DOT_EXECUTABLE_NOT_FOUND)
