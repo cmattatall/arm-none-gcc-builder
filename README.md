@@ -28,3 +28,15 @@ You can either build the docker image with `$docker build .` and use it to compi
 OpenOCD is used for debugging
 
 # Tests
+
+
+# Notes, Todo, and Future Work:
+
+- Configuring OpenOCD
+https://wiki.st.com/stm32mpu/wiki/GDB#Overview_of_GDB_setup_for_STM32MPU
+
+- SVD parsers (cortex debug can be used in the meantime as a vscode extension but its not ideal because this should be environment agnostic)
+
+
+
+
