@@ -20,5 +20,4 @@ else()
 endif()
 #]]
 
-
 FetchContent_MakeAvailable(cmsis)

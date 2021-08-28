@@ -1,16 +1,20 @@
 cmake_minimum_required(VERSION 3.21)
+if(NOT CMAKE_CROSSCOMPILING)
+    message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_FILE} can only be used as a subdirectory when cross compiling")
+endif(NOT CMAKE_CROSSCOMPILING)
 
-add_library(${PROJECT_NAME}-device-startup INTERFACE)
+add_library(${PROJECT_NAME}-device-startup)
 
 target_sources(${PROJECT_NAME}-device-startup
-    INTERFACE
-        ${FETCHCONTENT_BASE_DIR}/stm32f4-src/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc/startup_stm32f411xe.s
-        ${FETCHCONTENT_BASE_DIR}/stm32f4-src/Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/system_stm32f4xx.c
+    PRIVATE
+        src/startup_stm32f411xe.s
+        src/system_stm32f4xx.c
 )
 
 target_include_directories(${PROJECT_NAME}-device-startup 
-    INTERFACE
-        ${FETCHCONTENT_BASE_DIR}/stm32f4-src/Drivers/CMSIS/Device/ST/STM32F4xx/Include/
-        ${FETCHCONTENT_BASE_DIR}/stm32f4-src/Drivers/CMSIS/Core/Include/
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include>
 )
 

@@ -6,7 +6,7 @@ target_include_directories(${PROJECT_NAME}-middleware
         ${CMAKE_CURRENT_SOURCE_DIR}/src/include/
 
     PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
 )
 
 target_sources(${PROJECT_NAME}-middleware 
@@ -21,7 +21,7 @@ if(CMAKE_CROSSCOMPILING)
     # not driver interface APIs so we make the link interface
     # private
     target_link_libraries(${PROJECT_NAME}-middleware
-        PRIVATE
+        PUBLIC
             ${PROJECT_NAME}-driver-interface
     )
 
