@@ -1,2 +1,2 @@
 # Reading: https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html
-set(GRAPHVIZ_CUSTOM_TARGETS TRUE)
+set(GRAPHVIZ_CUSTOM_TARGETS FALSE)
