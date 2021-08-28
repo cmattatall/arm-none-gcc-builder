@@ -1,7 +1,5 @@
 #include "middleware.h"
-#include "private_middleware_header.h"
-
-#include "DI_public_header.h"
+#include "driver_api.h"
 
 void middleware_init() {
   DI_init();

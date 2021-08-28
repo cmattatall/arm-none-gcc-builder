@@ -1,5 +1,5 @@
-#ifndef __DRIVER_INTERFACE_PUBLIC_HEADER_H__
-#define __DRIVER_INTERFACE_PUBLIC_HEADER_H__
+#ifndef __DRIVER_INTERFACE_STUBS_H__
+#define __DRIVER_INTERFACE_STUBS_H__
 #ifdef __cplusplus
 /* clang-format off */
 extern "C"
@@ -18,4 +18,4 @@ int DI_init();
 }
 /* clang-format on */
 #endif /* End C linkage */
-#endif /* __DRIVER_INTERFACE_PUBLIC_HEADER_H__ */
+#endif /* __DRIVER_INTERFACE_STUBS_H__ */

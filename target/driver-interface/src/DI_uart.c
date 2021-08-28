@@ -1,4 +1,4 @@
-#include "DI_public_header.h"
+#include "driver_interface.h"
 #include "DI_private_header.h"
 
 #if defined(STM32)
