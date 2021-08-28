@@ -12,5 +12,5 @@ target_include_directories(${PROJECT_NAME}
         ${CMAKE_CURRENT_SOURCE_DIR}/src/include/
 
     PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
 )

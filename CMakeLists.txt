@@ -14,8 +14,6 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/fetch-content.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/utils.cmake)
 
 
-
-
 add_subdirectory(application)
 
 if(CMAKE_CROSSCOMPILING)

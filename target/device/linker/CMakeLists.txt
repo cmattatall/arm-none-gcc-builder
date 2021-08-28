@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
+if(NOT CMAKE_CROSSCOMPILING)
+    message(FATAL_ERROR "${CMAKE_CURRENT_SOURCE_FILE} can only be used as a subdirectory when cross compiling")
+endif(NOT CMAKE_CROSSCOMPILING)
 ################################################################################
 # YOU MAY WISH TO USE A CUSTOM LINKER SCRIPT, ADD IT IN THIS FILE HERE
 ################################################################################
@@ -16,14 +19,29 @@ cmake_minimum_required(VERSION 3.21)
 
 add_library(${PROJECT_NAME}-device-linker INTERFACE)
 
-# There are a couple ways to do this but cmake is unclear on which is the 
-# intended way. - August 2021
-# set_target_properties(device-linker PROPERTIES LINK_DEPENDS ${LINKER_SCRIPT})
+set_target_properties(${PROJECT_NAME}-device-linker 
+    PROPERTIES
+        INTERFACE_LINK_DEPENDS
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/STM32F411VETx_FLASH.ld>
+            $<INSTALL_INTERFACE:STM32F411VETx_FLASH>  
+        LINK_DEPENDS
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/STM32F411VETx_FLASH.ld>
+            $<INSTALL_INTERFACE:STM32F411VETx_FLASH>
+)
 
-# set_property(TARGET mylib PROPERTY INTERFACE_LINK_DEPENDS
-#        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/mylinkscript>
-#        $<INSTALL_INTERFACE:mylinkscript>  # <prefix>/mylinkscript
-#    )
+#[[
+set_property(GLOBAL
+    PROPERTY
+        INTERFACE_LINK_DEPENDS
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/STM32F411VETx_FLASH.ld>
+            $<INSTALL_INTERFACE:STM32F411VETx_FLASH>  
+)
 
-# 
+set_property(GLOBAL
+    PROPERTY
+        LINK_DEPENDS
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/STM32F411VETx_FLASH.ld>
+            $<INSTALL_INTERFACE:STM32F411VETx_FLASH>  
+)
 
+#]]
