@@ -7,7 +7,9 @@ extern "C"
 /* clang-format on */
 #endif /* Start C linkage */
 
-    void middleware_function();
+void middleware_init();
+
+void middlware_talk_to_modem();
 
 #ifdef __cplusplus
 /* clang-format off */
