@@ -1,5 +1,5 @@
-#ifndef __PRIVATE_MIDDLEWARE_HEADER_H__
-#define __PRIVATE_MIDDLEWARE_HEADER_H__
+#ifndef __DRIVER_INTERFACE_H__
+#define __DRIVER_INTERFACE_H__
 #ifdef __cplusplus
 /* clang-format off */
 extern "C"
@@ -7,15 +7,15 @@ extern "C"
 /* clang-format on */
 #endif /* Start C linkage */
 
-struct private_thing {
-    int a;
-    char b[50];
-};
+#include <stdint.h>
 
+int DI_uart_transmit_bytes(uint8_t *buf, uint16_t buflen);
+
+int DI_init();
 
 #ifdef __cplusplus
 /* clang-format off */
 }
 /* clang-format on */
 #endif /* End C linkage */
-#endif /* __PRIVATE_MIDDLEWARE_HEADER_H__ */
+#endif /* __DRIVER_INTERFACE_H__ */
