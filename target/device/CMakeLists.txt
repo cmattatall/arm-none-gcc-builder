@@ -28,13 +28,12 @@ add_library(${PROJECT_NAME}-device-build-deps INTERFACE)
 target_link_libraries(${PROJECT_NAME}-device-build-deps
     INTERFACE
         ${PROJECT_NAME}-device-cpu-flags
-        ${PROJECT_NAME}-device-vendor-config
         ${PROJECT_NAME}-device-linker
 )
 
 # Driver interface should inherit this as PRIVATE
-add_library(${PROJECT_NAME}-device-api INTERFACE)
-target_link_libraries(${PROJECT_NAME}-device-api
+add_library(${PROJECT_NAME}-device-interface INTERFACE)
+target_link_libraries(${PROJECT_NAME}-device-interface
     INTERFACE
         ${PROJECT_NAME}-device-peripherals
 )

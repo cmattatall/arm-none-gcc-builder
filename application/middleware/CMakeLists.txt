@@ -21,8 +21,10 @@ if(CMAKE_CROSSCOMPILING)
     # not driver interface APIs so we make the link interface
     # private
     target_link_libraries(${PROJECT_NAME}-middleware
-        PUBLIC
+        PRIVATE
             ${PROJECT_NAME}-driver-interface
+        PUBLIC
+            ${PROJECT_NAME}-driver-build-deps
     )
 
 endif(CMAKE_CROSSCOMPILING)

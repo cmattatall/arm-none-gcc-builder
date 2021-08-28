@@ -7,5 +7,11 @@ target_link_libraries(${PROJECT_NAME}-driver-interface
     PUBLIC
         ${PROJECT_NAME}-device-build-deps
     PRIVATE
-        ${PROJECT_NAME}-device-api
+        ${PROJECT_NAME}-device-interface
+)
+
+add_library(${PROJECT_NAME}-driver-build-deps INTERFACE)
+target_link_libraries(${PROJECT_NAME}-driver-build-deps
+    INTERFACE
+        ${PROJECT_NAME}-device-build-deps
 )
