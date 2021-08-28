@@ -26,7 +26,7 @@ set(TOOLCHAIN_PREFIX arm-none-eabi)
 ################################################################################
 # LINKER OPTIONS: CHANGE THESE BASED ON YOUR EMBEDDED TARGET
 ################################################################################
-set(CODEGEN_OPTIONS 
+set(CODEGEN_OPTIONS
     "                       \
     -mthumb-interwork       \
     -ffreestanding          \
@@ -39,14 +39,14 @@ set(CODEGEN_OPTIONS
     "
 )
 ################################################################################
-# Additional reading if interested: 
+# Additional reading if interested:
 # https://gcc.gnu.org/onlinedocs/gcc/ARM-Options.html
 ################################################################################
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 set(CMAKE_CROSSCOMPILING ON)
 
-# BINUTILS NAMES 
+# BINUTILS NAMES
 #(files with these names in PATH may not necessarily be true paths - could be links, aliases, etc.)
 set(TOOLCHAIN_C_COMPILER_NAME ${TOOLCHAIN_PREFIX}-gcc${CMAKE_EXECUTABLE_SUFFIX})
 set(TOOLCHAIN_ASM_COMPILER_NAME ${TOOLCHAIN_C_COMPILER_NAME}) # use same ASM compiler as C compiler for ABI compat
@@ -61,7 +61,7 @@ if(NOT DEFINED ENV{TOOLCHAIN_PROCESSED})
 
     # cmake can process the toolchain file multiple times but we only want
     # to emit the configuration info to the caller the very first time it is
-    # processed so that stdout doens't get flooded. 
+    # processed so that stdout doens't get flooded.
     #
     # To do this, we use (an admittedly hacky) environment variable to maintain
     # the statefulness of the cache population, try_compile() and try_run()
@@ -69,7 +69,7 @@ if(NOT DEFINED ENV{TOOLCHAIN_PROCESSED})
     #
     # Hopefully in the future, cmake will provide a better or standard way
     # to issue diagnostics when processing a toolchain file
-    message("") 
+    message("")
     message("Configured toolchain binutils: ")
     message("TOOLCHAIN_C_COMPILER_NAME ......... ${TOOLCHAIN_C_COMPILER_NAME}")
     message("TOOLCHAIN_ASM_COMPILER_NAME ....... ${TOOLCHAIN_ASM_COMPILER_NAME}")
@@ -78,7 +78,7 @@ if(NOT DEFINED ENV{TOOLCHAIN_PROCESSED})
     message("TOOLCHAIN_OBJDUMP_NAME ............ ${TOOLCHAIN_OBJDUMP_NAME}")
     message("TOOLCHAIN_SIZE_NAME ............... ${TOOLCHAIN_SIZE_NAME}")
     message("TOOLCHAIN_GDB_NAME ................ ${TOOLCHAIN_GDB_NAME}")
-    message("") 
+    message("")
 
     mark_as_advanced(TOOLCHAIN_PREFIX)
     mark_as_advanced(TOOLCHAIN_C_COMPILER_NAME)
@@ -94,7 +94,9 @@ endif(NOT DEFINED ENV{TOOLCHAIN_PROCESSED})
 
 if(MINGW OR CYGWIN OR WIN32)
     set(UTIL_SEARCH_COMMAND where)
-elseif(UNIX OR APPLE)
+elseif(UNIX AND NOT APPLE)
+    set(UTIL_SEARCH_COMMAND which)
+elseif(APPLE)
     set(UTIL_SEARCH_COMMAND which)
 else()
     message(FATAL_ERROR "SYSTEM : ${CMAKE_HOST_SYSTEM_NAME} not supported")
@@ -118,10 +120,10 @@ else()
 endif(TOOLCHAIN_BINUTILS_NOT_FOUND)
 
 ################################################################################
-# The found binary could be a link so we will try 
+# The found binary could be a link so we will try
 # to infer the toolchain directory from it.
-# 
-# If we can't follow a link the process to determine 
+#
+# If we can't follow a link the process to determine
 # the target sysroot becomes much more complicated....
 ################################################################################
 
@@ -130,17 +132,17 @@ if(MINGW OR CYGWIN OR WIN32)
     # TODO: on windows, we SHOULD follow links but this functionality isn't implemented yet
     # because an accessible tool like readlink isn't easily available on that platform
     #
-    # In general, Windows users don't tend to have a 
+    # In general, Windows users don't tend to have a
     # deep understand how filesystems work anyways...
-    # 
+    #
     # ¯\_(ツ)_/¯
     #     \/
     #     xx
     #     xx
     #    _/\_
-    #     
+    #
     # For now we will just assume the binary in PATH is not a link
-    set(TOOLCHAIN_GCC_PATH ${TOOLCHAIN_BINUTILS_PATH}) 
+    set(TOOLCHAIN_GCC_PATH ${TOOLCHAIN_BINUTILS_PATH})
 
 elseif(UNIX AND NOT APPLE)
     if(IS_SYMLINK TOOLCHAIN_BINUTILS_PATH)
@@ -154,6 +156,18 @@ elseif(UNIX AND NOT APPLE)
         # The path we found for the GCC binary is in PATH is indeed a true path
         set(TOOLCHAIN_GCC_PATH ${TOOLCHAIN_BINUTILS_PATH})
     endif(IS_SYMLINK TOOLCHAIN_BINUTILS_PATH)
+    elseif(APPLE)
+        if(IS_SYMLINK TOOLCHAIN_BINUTILS_PATH)
+            execute_process(
+            COMMAND readlink -f ${TOOLCHAIN_BINUTILS_PATH}
+            OUTPUT_VARIABLE TOOLCHAIN_GCC_PATH
+            RESULT_VARIABLE TOOLCHAIN_GCC_PATH_NOT_FOUND
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        else()
+            # The path we found for the GCC binary is in PATH is indeed a true path
+            set(TOOLCHAIN_GCC_PATH ${TOOLCHAIN_BINUTILS_PATH})
+        endif(IS_SYMLINK TOOLCHAIN_BINUTILS_PATH)
 else()
     message(FATAL_ERROR "${CMAKE_HOST_SYSTEM_NAME} not supported")
 endif()
@@ -202,42 +216,42 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 
 
 find_program(
-    CMAKE_C_COMPILER 
+    CMAKE_C_COMPILER
     NAMES ${TOOLCHAIN_C_COMPILER_NAME}
     HINTS ${TOOLCHAIN_BINUTILS_SEARCH_HINTS}
     REQUIRED
 )
 
 find_program(
-    CMAKE_ASM_COMPILER 
+    CMAKE_ASM_COMPILER
     NAMES ${TOOLCHAIN_ASM_COMPILER_NAME}
     HINTS ${TOOLCHAIN_BINUTILS_SEARCH_HINTS}
     REQUIRED
 )
 
 find_program(
-    CMAKE_CXX_COMPILER 
+    CMAKE_CXX_COMPILER
     NAMES ${TOOLCHAIN_CXX_COMPILER_NAME}
     HINTS ${TOOLCHAIN_BINUTILS_SEARCH_HINTS}
     REQUIRED
 )
 
 find_program(
-    CMAKE_OBJCOPY 
+    CMAKE_OBJCOPY
     NAMES ${TOOLCHAIN_OBJCOPY_NAME}
     HINTS ${TOOLCHAIN_BINUTILS_SEARCH_HINTS}
     REQUIRED
 )
 
 find_program(
-    CMAKE_OBJDUMP 
+    CMAKE_OBJDUMP
     NAMES ${TOOLCHAIN_OBJDUMP_NAME}
     HINTS ${TOOLCHAIN_BINUTILS_SEARCH_HINTS}
     REQUIRED
 )
 
 find_program(
-    CMAKE_SIZE 
+    CMAKE_SIZE
     NAMES ${TOOLCHAIN_SIZE_NAME}
     HINTS ${TOOLCHAIN_BINUTILS_SEARCH_HINTS}
     REQUIRED
@@ -247,9 +261,9 @@ find_program(
 # Note that GDB may not necessarily be required because we could be semihosting
 # (or maybe we just don't care about debugging on our platform or something)
 find_program(
-    CMAKE_GDB 
+    CMAKE_GDB
     NAMES ${TOOLCHAIN_GDB_NAME}
-    HINTS ${TOOLCHAIN_BINUTILS_SEARCH_HINTS} 
+    HINTS ${TOOLCHAIN_BINUTILS_SEARCH_HINTS}
 )
 
 # Configure initial compiler flags
@@ -262,8 +276,8 @@ mark_as_advanced(CMAKE_ASM_FLAGS_INIT)
 mark_as_advanced(CMAKE_C_FLAGS_INIT)
 mark_as_advanced(CMAKE_CXX_FLAGS_INIT)
 
-# This supports custom builds of gcc that may not use the default values 
-# provided by autotools when it was built. 
+# This supports custom builds of gcc that may not use the default values
+# provided by autotools when it was built.
 #
 # Examples: Yocto, OE, Alpine toolchains, or anything built using chroot
 set(CMAKE_INSTALL_RPATH ${TOOLCHAIN_USR_DIR})
@@ -276,8 +290,8 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 #-------------------------------------------------------------------------------
 function(print_section_sizes TARGET)
     add_custom_command(
-        TARGET ${TARGET} 
-        POST_BUILD 
+        TARGET ${TARGET}
+        POST_BUILD
         COMMAND ${CMAKE_SIZE} ${TARGET}
     )
 endfunction()
@@ -289,8 +303,8 @@ endfunction()
 function(create_hex_output TARGET)
     if(TARGET ${TARGET})
         add_custom_target(
-            ${TARGET}.hex ALL 
-            DEPENDS ${TARGET} 
+            ${TARGET}.hex ALL
+            DEPENDS ${TARGET}
             COMMAND ${CMAKE_OBJCOPY} -Oihex ${TARGET} ${TARGET}.hex
         )
     else()
@@ -306,8 +320,8 @@ function(create_bin_output TARGET)
     if(TARGET ${TARGET})
 
         add_custom_target(
-            ${TARGET}.bin ALL 
-            DEPENDS ${TARGET} 
+            ${TARGET}.bin ALL
+            DEPENDS ${TARGET}
             COMMAND ${CMAKE_OBJCOPY} -Obinary ${TARGET} ${TARGET}.bin
         )
     else()
@@ -386,12 +400,12 @@ function(create_lss_output TARGET)
         else()
             message(WARNING "Property TYPE for target: ${TARGET} does not exist")
         endif(TARGET_TYPE)
-        
+
 
         if(${TARGET}_IS_VALID)
             add_custom_target(
-                ${TARGET}.lss ALL 
-                DEPENDS ${TARGET} 
+                ${TARGET}.lss ALL
+                DEPENDS ${TARGET}
                 COMMAND ${CMAKE_OBJDUMP} -xh ${OUTPUT_DIRECTORY}/${TARGET} > "${OUTPUT_DIRECTORY}/${LIB_NAME_BASE}.lss"
                 VERBATIM
                 add_custom_command()
@@ -405,7 +419,7 @@ function(create_lss_output TARGET)
 endfunction()
 
 #[[
-add_custom_command( 
+add_custom_command(
             TARGET ${library}_postbuild
             POST_BUILD
             DEPENDS ALL
@@ -431,7 +445,7 @@ function(add_executable exe)
 
         set_target_properties(${exe} PROPERTIES SUFFIX "${SUFFIX}")
         set_target_properties(${exe} PROPERTIES OUTPUT_NAME "${OUTPUT_NAME}")
-        set_target_properties(${exe} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}")    
+        set_target_properties(${exe} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}")
 
         # Custom targets are always considered out of date so the postbuild tasks will always run
         add_custom_target(${exe}_postbuild ALL DEPENDS ${exe})
