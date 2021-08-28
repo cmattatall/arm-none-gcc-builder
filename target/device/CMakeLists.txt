@@ -16,6 +16,7 @@ target_link_libraries(${PROJECT_NAME}-device-startup
         ${PROJECT_NAME}-device-cpu-core
         ${PROJECT_NAME}-device-cpu-flags
         ${PROJECT_NAME}-device-vendor-config
+        ${PROJECT_NAME}-device-linker
 )
 
 target_link_libraries(${PROJECT_NAME}-device-peripherals 
