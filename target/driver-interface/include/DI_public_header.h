@@ -9,7 +9,7 @@ extern "C"
 
 #include <stdint.h>
 
-int DI_uart_transmit_bytes(uint8_t *buf, uint16_t *buflen);
+int DI_uart_transmit_bytes(uint8_t *buf, uint16_t buflen);
 
 int DI_init();
 
