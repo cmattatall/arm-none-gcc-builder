@@ -13,7 +13,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 99)
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/fetch-content.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/utils.cmake)
 
 message("")
@@ -60,7 +59,7 @@ endif()
 
 add_subdirectory(application)
 add_subdirectory(target)
-
+add_subdirectory(tests)
 
 
 
@@ -91,4 +90,5 @@ if(${CMAKE_VERSION} VERSION_GREATER "3.21.0")
 else()
     message(WARNING "Cannot create graphviz visualization of software architecture. Not supported in cmake version : ${CMAKE_VERSION}")
 endif()
+
 
