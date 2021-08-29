@@ -268,8 +268,8 @@ find_program(
 
 # Configure initial compiler flags
 set(CMAKE_ASM_FLAGS_INIT "${CODEGEN_OPTIONS}")
-set(CMAKE_C_FLAGS_INIT "${CODEGEN_OPTIONS}")
-set(CMAKE_CXX_FLAGS_INIT "${CODEGEN_OPTIONS} -fno-rtti -fno-exceptions")
+set(CMAKE_C_FLAGS_INIT "${CODEGEN_OPTIONS} -Wall -Wextra")
+set(CMAKE_CXX_FLAGS_INIT "${CODEGEN_OPTIONS} -Wall -Wextra -fno-rtti -fno-exceptions")
 set(CMAKE_EXE_LINKER_FLAGS_INIT "-Wl,--relax,--gc-sections")
 
 mark_as_advanced(CMAKE_ASM_FLAGS_INIT)
