@@ -1,3 +1,10 @@
+/*
+ * @brief LINKER SCRIPT FOR STM32F411VETx 
+ * @author Carl Mattatall
+ * @note I've since added this header but this file was written ~ early 2019
+ *       in case you are someone in the future dealing with linkerscript issues
+ */
+
 /* Entry Point */
 ENTRY(Reset_Handler)
 

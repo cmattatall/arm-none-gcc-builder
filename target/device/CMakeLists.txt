@@ -7,7 +7,6 @@ endif(NOT CMAKE_CROSSCOMPILING)
 # ARCHITECTED THEIR SOFTWARE, THERE MAY BE CIRCULAR DEPENDENCIES OTHERWISE
 add_subdirectory(vendor-config)
 add_subdirectory(cpu)
-add_subdirectory(linker)
 add_subdirectory(startup)
 add_subdirectory(peripherals)
 
@@ -16,7 +15,6 @@ target_link_libraries(${PROJECT_NAME}-device-startup
         ${PROJECT_NAME}-device-cpu-core
         ${PROJECT_NAME}-device-cpu-flags
         ${PROJECT_NAME}-device-vendor-config
-        ${PROJECT_NAME}-device-linker
 )
 
 target_link_libraries(${PROJECT_NAME}-device-peripherals 
@@ -29,7 +27,6 @@ add_library(${PROJECT_NAME}-device-build-deps INTERFACE)
 target_link_libraries(${PROJECT_NAME}-device-build-deps
     INTERFACE
         ${PROJECT_NAME}-device-cpu-flags
-        ${PROJECT_NAME}-device-linker
 )
 
 # Driver interface should inherit this as PRIVATE
