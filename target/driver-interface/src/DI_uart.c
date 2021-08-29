@@ -11,13 +11,13 @@
 #endif /* #if defined(STM32) */
 
 void DI_private_helper_function() {
-  // doing some helper function stuff
+    // doing some helper function stuff
 }
 
 int DI_uart_transmit_bytes(uint8_t *buf, uint16_t buflen) {
 #if defined(STM32)
 #if defined(STM32F411xE)
-  // HAL_UART_Transmit( /* ... args ... */);
+    // HAL_UART_Transmit( /* ... args ... */);
 #elif defined(STM32F411xE)
 
 #else
@@ -29,10 +29,13 @@ int DI_uart_transmit_bytes(uint8_t *buf, uint16_t buflen) {
 #else
 #error NO PREPROCESSOR DEFINITION TO SELECT VENDOR APIs FOR DI_uart_transmit_bytes
 #endif /* #if defined(STM32) */
+
+    return 0;
 }
 
 int DI_init() {
-  // do stuff to initialize the abstract peripheral driver layer
+    // do stuff to initialize the abstract peripheral driver layer
 
-  DI_private_helper_function();
+    DI_private_helper_function();
+    return 0;
 }
