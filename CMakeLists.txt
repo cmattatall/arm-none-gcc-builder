@@ -15,12 +15,9 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/utils.cmake)
 
 
 add_subdirectory(application)
+add_subdirectory(target)
 
-if(CMAKE_CROSSCOMPILING)
-    
-    add_subdirectory(target)
 
-endif(CMAKE_CROSSCOMPILING)
 
 
 get_all_targets(all_targets)
