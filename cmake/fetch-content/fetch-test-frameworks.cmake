@@ -9,8 +9,9 @@ FetchContent_MakeAvailable(googletest)
 
 
 FetchContent_Declare(
-    catch2
+    Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
     GIT_TAG        c4e3767e265808590986d5db6ca1b5532a7f3d13 # v2.13.4
 )
-FetchContent_MakeAvailable(catch2)
+FetchContent_MakeAvailable(Catch2)
+

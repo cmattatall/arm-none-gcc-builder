@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
+
 # NOTES ON CREATING A VERSION HEADER (for future reference)
 # https://cmake.org/pipermail/cmake/2010-July/038015.html
 
@@ -9,25 +10,66 @@ project(project
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_C_STANDARD 99)
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/fetch-content.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/utils.cmake)
+
+message("")
+message("")
+
+
+
+if(PRODUCTION)
+
+    message(STATUS "Building project: \"${PROJECT_NAME}\" for production.")
+
+    set(CMAKE_BUILD_TYPE MinSizeRel)
+
+    set(CMAKE_C_FLAGS_MINSIZEREL
+        "\
+        ${CMAKE_C_FLAGS_MINSIZEREL} \
+        -ffunction-sections \
+        -fdata-sections \
+        -flto \
+        -ffat-lto-objects \
+        -fuse-linker-plugin \
+        "
+    )
+
+    set(CMAKE_CXX_FLAGS_MINSIZEREL 
+        "\         
+        ${CMAKE_CXX_FLAGS_MINSIZEREL} \
+        -ffunction-sections \
+        -fdata-sections \
+        -flto \
+        -ffat-lto-objects \
+        -fuse-linker-plugin \
+        "
+    )
+
+else()
+    if(NOT CMAKE_BUILD_TYPE)
+        set(CMAKE_BUILD_TYPE_DEFAULT Debug)
+        message(WARNING "CMAKE_BUILD_TYPE not set so using ${CMAKE_BUILD_TYPE_DEFAULT} as default")
+        set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_DEFAULT})
+    endif()
+endif()
 
 
 add_subdirectory(application)
+add_subdirectory(target)
+add_subdirectory(tests)
 
-if(CMAKE_CROSSCOMPILING)
-    
-    add_subdirectory(target)
-
-endif(CMAKE_CROSSCOMPILING)
 
 
 get_all_targets(all_targets)
+message("")
 message("listing all targets:")
 foreach(target ${all_targets})
-    message("${target}")
+    message("- ${target}")
 endforeach(target ${all_targets})
+message("")
 
 
 if(${CMAKE_VERSION} VERSION_GREATER "3.21.0")
@@ -48,4 +90,5 @@ if(${CMAKE_VERSION} VERSION_GREATER "3.21.0")
 else()
     message(WARNING "Cannot create graphviz visualization of software architecture. Not supported in cmake version : ${CMAKE_VERSION}")
 endif()
+
 
