@@ -22,14 +22,14 @@ macro(add_unit_test target)
     list(APPEND UNIT_TEST_TARGETS ${target})
 endmacro(add_unit_test target)
 
-add_unit_test(unit-tests)
-target_sources(unit-tests
+add_unit_test(catch2-tests)
+target_sources(catch2-tests
     PRIVATE
         catch2/main.cpp
         catch2/middleware-init.cpp
         catch2/catch2-usage-example.cpp
 )
-target_link_libraries(unit-tests 
+target_link_libraries(catch2-tests 
     PRIVATE 
         Catch2
         ${PROJECT_NAME}-middleware
