@@ -73,3 +73,7 @@ extern
 # Weird things happen with CMake module FetchContent...
 *.un~
 *.~
+
+
+## VS CODE STUFF ##
+.vscode
