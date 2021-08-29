@@ -29,8 +29,10 @@ target_link_libraries(unit-tests
         ${PROJECT_NAME}-middleware
 )
 
-
-
+add_custom_target(run-unit-tests ALL
+    ./unit-tests
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+)
 
 else()
     message(STATUS "Cross compiling so ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt will not be processed.")
