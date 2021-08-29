@@ -10,7 +10,7 @@ target_include_directories(${PROJECT_NAME}-middleware
 
 target_sources(${PROJECT_NAME}-middleware 
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/middleware.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/middleware.cpp
 )
 
 

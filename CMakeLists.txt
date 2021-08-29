@@ -59,17 +59,33 @@ endif()
 
 add_subdirectory(application)
 add_subdirectory(target)
+
+enable_testing()
+include(CTest)
 add_subdirectory(tests)
 
 
 
 get_all_targets(all_targets)
 message("")
-message("listing all targets:")
+message("Targets for project: ${PROJECT_NAME}")
+set(UTILITY_TARGETS "")
 foreach(target ${all_targets})
-    message("- ${target}")
+    get_target_property(TYPE ${target} TYPE)
+    
+    if(TYPE STREQUAL UTILITY)
+        list(APPEND UTILITY_TARGETS ${target})
+    else()
+        message("- ${target}")
+    endif()
 endforeach(target ${all_targets})
 message("")
+message("Utility targets for project: ${PROJECT_NAME}")
+foreach(util_target ${UTILITY_TARGETS})
+    message("- ${util_target}")
+endforeach(util_target ${UTILITY_TARGETS})
+message("")
+
 
 
 if(${CMAKE_VERSION} VERSION_GREATER "3.21.0")

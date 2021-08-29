@@ -7,7 +7,14 @@ extern "C"
 /* clang-format on */
 #endif /* Start C linkage */
 
-void middleware_init();
+
+enum class MiddlewareInitStatus {
+    OK,
+    ERROR,
+    UNKNOWN,
+};
+
+MiddlewareInitStatus middleware_init();
 
 void middlware_talk_to_modem();
 
