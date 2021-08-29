@@ -8,31 +8,35 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(Catch2)
 
-enable_testing()
-include(CTest)
 
-add_executable(unit-tests)
+set(UNIT_TEST_TARGETS "")
+
+macro(add_unit_test target)
+    add_executable(${target})
+    set_target_properties(${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+    add_test(
+        NAME run-${target}
+        COMMAND ./${target}
+        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+    )
+    list(APPEND UNIT_TEST_TARGETS ${target})
+endmacro(add_unit_test target)
+
+add_unit_test(unit-tests)
 target_sources(unit-tests
     PRIVATE
         catch2/main.cpp
+        catch2/middleware-init.cpp
         catch2/catch2-usage-example.cpp
 )
-
-set_target_properties(unit-tests 
-    PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}
-)
-
 target_link_libraries(unit-tests 
     PRIVATE 
         Catch2
         ${PROJECT_NAME}-middleware
 )
 
-add_custom_target(run-unit-tests ALL
-    ./unit-tests
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-)
+
+add_custom_target(run-tests ALL COMMAND ${CMAKE_CTEST_COMMAND} --verbose DEPENDS ${UNIT_TEST_TARGETS})
 
 else()
     message(STATUS "Cross compiling so ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt will not be processed.")

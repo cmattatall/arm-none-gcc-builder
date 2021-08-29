@@ -59,6 +59,9 @@ endif()
 
 add_subdirectory(application)
 add_subdirectory(target)
+
+enable_testing()
+include(CTest)
 add_subdirectory(tests)
 
 
