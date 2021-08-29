@@ -29,16 +29,19 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     build_tree_dir = "build"
-
     configure_command = "cmake -S . -B %s " % (build_tree_dir)
     build_command = "cmake --build %s " % (build_tree_dir)
     if(args.crosscompiling):
         pass
         configure_command += " %s " % ("--toolchain=cmake/toolchains/arm-none-eabi-gcc-toolchain.cmake")
-        if(args.release_build):
-            configure_command += " %s " % ("-DPRODUCTION=1")
     else:
         pass
+
+
+    if(args.release_build):
+        configure_command += " %s " % ("-DPRODUCTION=1")
+    else:
+        configure_command += " %s " % ("-DPRODUCTION=0")
 
     os.system(configure_command)
     os.system(build_command)

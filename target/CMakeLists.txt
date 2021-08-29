@@ -20,7 +20,5 @@ if(CMAKE_CROSSCOMPILING)
     )
 
 else()
-    message(STATUS "")
     message(STATUS "Not cross compiling so ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt will not be processed.")
-    message(STATUS "")
 endif(CMAKE_CROSSCOMPILING)
