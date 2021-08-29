@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
+if(NOT CMAKE_CROSSCOMPILING)
 include(FetchContent)
-
-
 FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
@@ -12,17 +11,27 @@ FetchContent_MakeAvailable(Catch2)
 enable_testing()
 include(CTest)
 
-add_executable(catch2-tests)
-target_sources(catch2-tests
+add_executable(unit-tests)
+target_sources(unit-tests
     PRIVATE
         catch2/main.cpp
         catch2/catch2-usage-example.cpp
-
 )
 
-set_target_properties(catch2-tests 
+set_target_properties(unit-tests 
     PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}
 )
 
-target_link_libraries(catch2-tests PRIVATE Catch2)
+target_link_libraries(unit-tests 
+    PRIVATE 
+        Catch2
+        ${PROJECT_NAME}-middleware
+)
+
+
+
+
+else()
+    message(STATUS "Cross compiling so ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt will not be processed.")
+endif(NOT CMAKE_CROSSCOMPILING)
