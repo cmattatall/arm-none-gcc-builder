@@ -25,12 +25,22 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="parse command line args for docker build script")
     parser.add_argument("--cross", action="store_true", dest="crosscompiling", help="Option to cross compile")
     parser.add_argument("--release", action="store_true", dest="release_build", help="Build the project as a release build")
+    parser.add_argument("--clean", action="store_true", dest="build_clean", help="Rebuild the entire project from source")
 
     args = parser.parse_args()
 
     build_tree_dir = "build"
     configure_command = "cmake -S . -B %s " % (build_tree_dir)
     build_command = "cmake --build %s " % (build_tree_dir)
+
+
+    if(args.build_clean):
+        if(os.path.isdir(build_tree_dir)):
+            shutil.rmtree(build_tree_dir)
+        else:
+            print("[WARNING] cannot clean file: %s . Reason: not a directory" % ( build_tree_dir))
+            
+
     if(args.crosscompiling):
         pass
         configure_command += " %s " % ("--toolchain=cmake/toolchains/arm-none-eabi-gcc-toolchain.cmake")
