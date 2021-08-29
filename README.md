@@ -27,6 +27,15 @@ You can either build the docker image with `$docker build .` and use it to compi
 
 OpenOCD is used for debugging
 
+## Setup
+
+### Windows
+
+
+### Linux
+
+#### UDev rules
+
 # Tests
 
 
