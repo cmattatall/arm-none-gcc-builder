@@ -44,7 +44,7 @@ set(CODEGEN_OPTIONS
 ################################################################################
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
-set(CMAKE_CROSSCOMPILING ON)
+set(CMAKE_CROSSCOMPILING ON CACHE BOOL "Option to cross compile the project for a device different from the host cpu" FORCE)
 
 # BINUTILS NAMES
 #(files with these names in PATH may not necessarily be true paths - could be links, aliases, etc.)
