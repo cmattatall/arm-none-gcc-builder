@@ -20,11 +20,9 @@ target_include_directories(${PROJECT_NAME}
 )
 
 
-if(CMAKE_CROSSCOMPILING)
 
-    print_section_sizes(${PROJECT_NAME})
-    create_hex_output(${PROJECT_NAME})
-    create_bin_output(${PROJECT_NAME})
-    create_lss_output(${PROJECT_NAME})
+print_section_sizes(${PROJECT_NAME})
+create_hex_output(${PROJECT_NAME})
+create_bin_output(${PROJECT_NAME})
+create_lss_output(${PROJECT_NAME})
 
-endif(CMAKE_CROSSCOMPILING)
