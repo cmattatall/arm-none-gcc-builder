@@ -1,3 +1,4 @@
+from genericpath import isdir, isfile
 import os
 import sys
 import argparse
@@ -8,6 +9,7 @@ import shutil
 import json
 import subprocess
 import signal
+import re
 
 def crtl_c_exit(sig, frame):
     print('You pressed Ctrl+C! Exiting')
@@ -17,6 +19,29 @@ signal.signal(signal.SIGINT, crtl_c_exit)
 def checkPythonVersion():
     if sys.version_info.major < 3: # python 3 must be the runtime
         raise Exception("%s must be executed using Python 3" % (os.path.basename(__file__)))
+
+def wasPreviousBuildCrossCompiled(build_tree):
+    if os.path.isdir(build_tree):
+        cmake_cache_file = os.path.join(build_tree, "CMakeCache.txt")
+        if(os.path.isfile(cmake_cache_file)):
+            cross_compiling_enabled_regex = "^CMAKE_CROSSCOMPILING:BOOL=ON"
+            with open(cmake_cache_file) as search:
+                for line in search:
+                    line = line.rstrip()  # remove '\n' at end of line
+                    result = re.search(cross_compiling_enabled_regex, line)
+                    if result != None:
+                        return True
+        else:
+            print("cmake_cache_file : %s is not a file." % (cmake_cache_file))
+    else:
+        print("build_tree: " + str(build_tree) + " is not a directory")
+    return False
+
+def cleanCmakeBuildTree(build_tree):
+    if(os.path.isdir(build_tree)):
+        shutil.rmtree(build_tree)
+    else:
+        print("[WARNING] cannot clean file: %s . Reason: not a directory" % ( build_tree))
 
 
 if __name__ == "__main__":
@@ -34,24 +59,32 @@ if __name__ == "__main__":
     build_command = "cmake --build %s " % (build_tree_dir)
 
 
-    if(args.build_clean):
-        if(os.path.isdir(build_tree_dir)):
-            shutil.rmtree(build_tree_dir)
-        else:
-            print("[WARNING] cannot clean file: %s . Reason: not a directory" % ( build_tree_dir))
-            
 
+
+    build_tree_cleaned = False
     if(args.crosscompiling):
-        pass
         configure_command += " %s " % ("--toolchain=cmake/toolchains/arm-none-eabi-gcc-toolchain.cmake")
-    else:
-        pass
 
+        if not wasPreviousBuildCrossCompiled(build_tree_dir):
+            # We have to do a complete rebuild because every binary
+            # object was compiled for a different arch
+            cleanCmakeBuildTree(build_tree_dir)
+            build_tree_cleaned = True
+    else:
+        if wasPreviousBuildCrossCompiled(build_tree_dir):
+            # We have to do a complete rebuild because every binary
+            # object was compiled for a different arch
+            cleanCmakeBuildTree(build_tree_dir)
+            build_tree_cleaned = True
+
+    if(args.build_clean):
+        if not build_tree_cleaned:
+            cleanCmakeBuildTree(build_tree_dir)
 
     if(args.release_build):
         configure_command += " %s " % ("-DPRODUCTION=1")
     else:
-        configure_command += " %s " % ("-DPRODUCTION=0")
+        configure_command += " %s " % ("-DPRODUCTION=0 -DCMAKE_BUILD_TYPE=Debug")
 
     os.system(configure_command)
     os.system(build_command)
