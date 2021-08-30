@@ -98,6 +98,7 @@ function(print_section_sizes TARGET)
                     POST_BUILD
                     DEPENDS ${TARGET}
                     COMMAND ${CMAKE_SIZE} ${TARGET}
+                    COMMENT "Printing section sizes for target : ${TARGET}"
                     VERBATIM
                     WORKING_DIRECTORY ${OUTPUT_DIRECTORY}
                 )
