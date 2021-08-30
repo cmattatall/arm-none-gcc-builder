@@ -9,9 +9,9 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Catch2)
 
 
-set(UNIT_TEST_TARGETS "")
+set(AUTOMATED_TEST_TARGETS "")
 
-macro(add_unit_test target)
+macro(add_automated_test target)
     add_executable(${target})
     set_target_properties(${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
     add_test(
@@ -19,10 +19,10 @@ macro(add_unit_test target)
         COMMAND ./${target}
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     )
-    list(APPEND UNIT_TEST_TARGETS ${target})
-endmacro(add_unit_test target)
+    list(APPEND AUTOMATED_TEST_TARGETS ${target})
+endmacro(add_automated_test target)
 
-add_unit_test(catch2-tests)
+add_automated_test(catch2-tests)
 target_sources(catch2-tests
     PRIVATE
         catch2/main.cpp
@@ -35,8 +35,13 @@ target_link_libraries(catch2-tests
         ${PROJECT_NAME}-middleware
 )
 
+target_include_directories(catch2-tests 
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/catch2/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/catch2/include/mocks
+)
 
-add_custom_target(run-tests ALL COMMAND ${CMAKE_CTEST_COMMAND} --verbose DEPENDS ${UNIT_TEST_TARGETS})
+add_custom_target(run-tests ALL COMMAND ${CMAKE_CTEST_COMMAND} --verbose DEPENDS ${AUTOMATED_TEST_TARGETS})
 
 else()
     message(STATUS "Cross compiling so ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt will not be processed.")
