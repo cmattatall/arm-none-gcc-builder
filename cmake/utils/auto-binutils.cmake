@@ -1,5 +1,22 @@
 cmake_minimum_required(VERSION 3.21)
 
+if(NOT CMAKE_SIZE)
+    set(CMAKE_SIZE "size${CMAKE_EXECUTABLE_SUFFIX}")
+endif(NOT CMAKE_SIZE)
+
+if(NOT CMAKE_OBJCOPY)
+    set(CMAKE_OBJCOPY "objcopy${CMAKE_EXECUTABLE_SUFFIX}")
+endif(NOT CMAKE_OBJCOPY)
+
+if(NOT CMAKE_OBJDUMP)
+    set(CMAKE_OBJDUMP "objdump${CMAKE_EXECUTABLE_SUFFIX}")
+endif(NOT CMAKE_OBJDUMP)
+
+if(NOT CMAKE_READELF)
+    set(CMAKE_READELF "readelf${CMAKE_EXECUTABLE_SUFFIX}")
+endif(NOT CMAKE_READELF)
+
+
 #-------------------------------------------------------------------------------
 # Prints the section sizes
 #-------------------------------------------------------------------------------
