@@ -470,7 +470,7 @@ function(create_hex_output TARGET)
     else()
         message(FATAL_ERROR "Target ${TARGET} is not a target. function ${CMAKE_CURRENT_FUNCTION_} cannot proceed.")
     endif(TARGET ${TARGET})
-endfunction()
+endfunction(create_hex_output TARGET)
 
 
 #-------------------------------------------------------------------------------
@@ -562,7 +562,7 @@ function(create_bin_output TARGET)
     else()
         message(FATAL_ERROR "Target ${TARGET} is not a target. function ${CMAKE_CURRENT_FUNCTION_} cannot proceed.")
     endif(TARGET ${TARGET})
-endfunction()
+endfunction(create_bin_output TARGET)
 
 
 function(create_lss_output TARGET)
@@ -651,7 +651,7 @@ function(create_lss_output TARGET)
     else()
         message(FATAL_ERROR "Target ${TARGET} is not a target. function ${CMAKE_CURRENT_FUNCTION_} cannot proceed.")
     endif(TARGET ${TARGET})
-endfunction()
+endfunction(create_lss_output TARGET)
 
 
 
