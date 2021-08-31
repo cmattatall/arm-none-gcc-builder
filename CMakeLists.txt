@@ -60,13 +60,13 @@ endif()
 add_subdirectory(application)
 add_subdirectory(target)
 
-message("Targets for project: ${PROJECT_NAME}")
-
-get_all_targets(t)
-foreach(a ${t})
-    message("- ${a}")
-endforeach(a ${t})
-
+message("")
+message("Targets for project ${PROJECT_NAME}:")
+get_all_targets(targets)
+foreach(target ${targets})
+    message("> ${target}")
+endforeach(target ${targets})
+message("")
 
 
 enable_testing()

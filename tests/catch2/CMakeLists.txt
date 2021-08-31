@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 if(NOT CMAKE_CROSSCOMPILING)
-
     include(FetchContent)
+    set(FETCHCONTENT_QUIET OFF)
     FetchContent_Declare(
         Catch2
         GIT_REPOSITORY https://github.com/catchorg/Catch2.git
@@ -9,23 +9,7 @@ if(NOT CMAKE_CROSSCOMPILING)
     )
     FetchContent_MakeAvailable(Catch2)
 
-
-    set(AUTOMATED_TEST_TARGETS "")
-
-#    get_directory_property(VAR1 DIRECTORY subdir1 DEFINITION VAR1)
-
-    macro(add_automated_test target)
-        add_executable(${target})
-        set_target_properties(${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
-        add_test(
-            NAME run-${target}
-            COMMAND ./${target}
-            WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-        )
-        list(APPEND AUTOMATED_TEST_TARGETS ${target})
-    endmacro(add_automated_test target)
-
-    add_automated_test(catch2-tests)
+    add_unit_test(catch2-tests)
 
     file(GLOB catch2_sources "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
     target_sources(catch2-tests PRIVATE ${catch2_sources})
@@ -39,8 +23,6 @@ if(NOT CMAKE_CROSSCOMPILING)
             ${CMAKE_CURRENT_SOURCE_DIR}/include
             ${CMAKE_CURRENT_SOURCE_DIR}/include/mocks
     )
-
-    add_custom_target(run-tests ALL COMMAND ${CMAKE_CTEST_COMMAND} --verbose DEPENDS ${AUTOMATED_TEST_TARGETS})
 
 else()
     message(STATUS "Cross compiling so ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt will not be processed.")
