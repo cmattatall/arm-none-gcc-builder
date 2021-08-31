@@ -6,26 +6,19 @@ Project to create a customizable build system for arm-based micros that runs on 
 
 - Docker (20.10.5 or greater)   https://www.docker.com/products/docker-desktop
 - Python (3.6 or or greater)    https://www.python.org/downloads/
-- CMake  (3.21.0 or greater)    https://cmake.org/download/
 
 # Usage
 
-## Windows
-
-Builds must be done inside the docker container. 
-
-To start build the image, do `$docker build .` from inside the base of the repository
-
-## Unix
-
-You can either build the docker image with `$docker build .` and use it to compile your cmake projects, or build natively
 
 # Building
 
+With the necessary dependencies installed, execute `python3 ./compile.py` from the root of the project
 
 # Debugging
 
 OpenOCD is used for debugging
+
+For more information, consult https://openocd.org/
 
 ## Setup
 
