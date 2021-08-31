@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.21)
+if(CMAKE_CROSSCOMPILING)
+    add_subdirectory(cross)
+else()
+    add_subdirectory(host)
+endif(CMAKE_CROSSCOMPILING)
