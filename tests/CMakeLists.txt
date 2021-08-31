@@ -15,8 +15,6 @@ function(add_unit_test target)
     )
 endfunction(add_unit_test target)
 
-# These are tests of the build system itself, not of the code being built
-add_subdirectory(meta)
 
 # These are catch2 unit tests
 add_subdirectory(catch2)
