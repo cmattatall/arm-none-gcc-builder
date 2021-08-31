@@ -12,7 +12,7 @@ Project to create a customizable build system for arm-based micros that runs on 
 
 # Building
 
-With the necessary dependencies installed, execute `python3 ./compile.py` from the root of the project
+With the necessary dependencies installed, execute `$python3 ./compile.py` from the root of the project
 
 # Debugging
 
