@@ -46,6 +46,19 @@ def query_yes_no(question, default="yes"):
         else:
             sys.stdout.write("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
 
+def docker_container_reset(container, container_tag):
+    os.system("docker container stop %s" % (container))
+    os.system("docker container rm %s " % (container))
+    os.system("docker create -it --name %s %s" % (container, container_tag))
+    os.system("docker container start %s" % (container))
+
+
+def docker_container_cleanup(container):
+    print("Performing cleanup of docker resources ...")
+    os.system("docker container stop %s" % (container))
+    os.system("docker container rm %s" % (container))
+    print("ok")
+
 # This updates the vscode intellisense file compile_commands.json emitted in the docker container 
 # to work on the native path
 # the compiler toolchain arm-none-eabi-gcc should be present in the user's PATH (absolute, executable, hardlink, or symlink)
@@ -135,10 +148,9 @@ if __name__ == "__main__":
     elif image_rebuild:
         os.system("docker build . -t %s" % (docker_tag)) # build docker image from scatch (or from cache)
 
-    os.system("docker container stop %s" % (container))
-    os.system("docker container rm %s " % (container))
-    os.system("docker create -it --name %s %s" % (container, docker_tag))
-    os.system("docker container start %s" % (container))
+
+    docker_container_reset(container, docker_tag)
+
 
     # THIS NEXT SECTION IS LITERALLY JUST PATH WRANGLING SO THAT 
     # WE CAN EXECUTE THE DOCKER BUILD AND HAVE INTELLISENSE WORK IN A PLATFORM-AGNOSTIC MANNGER
@@ -172,10 +184,7 @@ if __name__ == "__main__":
     os.system("docker cp %s:\"%s\" \"%s\"" % (container, str(posixCurrentDirPathObj/posixBuildDirPathObj), str(nativeCurrentDirPathObj)))
     print("ok")
 
-    print("Performing cleanup of docker resources ...")
-    os.system("docker container stop %s" % (container))
-    os.system("docker container rm %s" % (container))
-    print("ok")
+    docker_container_cleanup(container)
 
 
     ## THIS NEXT SECTION IS MODIFYING THE EXPORTED JSON SO THAT INTELLISENSE WORKS ON THE NATIVE PLATFORM
