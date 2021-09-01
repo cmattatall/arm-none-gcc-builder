@@ -13,6 +13,7 @@ target_include_directories(${PROJECT_NAME}-device-peripherals
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Legacy/>
 )
 
+
 target_sources(${PROJECT_NAME}-device-peripherals 
     PRIVATE
         src/stm32f4xx_hal_ltdc.c          
@@ -110,8 +111,9 @@ target_sources(${PROJECT_NAME}-device-peripherals
 
 target_link_libraries(${PROJECT_NAME}-device-peripherals 
     PRIVATE
-        ${PROJECT_NAME}-device-vendor-config
         ${PROJECT_NAME}-device-startup
+    PUBLIC
+        ${PROJECT_NAME}-device-vendor-config
 )
 
 

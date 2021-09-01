@@ -10,29 +10,6 @@ add_subdirectory(cpu)
 add_subdirectory(startup)
 add_subdirectory(peripherals)
 
-target_link_libraries(${PROJECT_NAME}-device-startup 
-    PUBLIC 
-        ${PROJECT_NAME}-device-cpu-core
-        ${PROJECT_NAME}-device-cpu-flags
-        ${PROJECT_NAME}-device-vendor-config
-)
-
-
-
-# Driver interface should inherit this as PUBLIC
-add_library(${PROJECT_NAME}-device-build-deps INTERFACE)
-target_link_libraries(${PROJECT_NAME}-device-build-deps
-    INTERFACE
-        ${PROJECT_NAME}-device-cpu-flags
-)
-
-# Driver interface should inherit this as PRIVATE
-add_library(${PROJECT_NAME}-device INTERFACE)
-target_link_libraries(${PROJECT_NAME}-device
-    INTERFACE
-        ${PROJECT_NAME}-device-peripherals
-        ${PROJECT_NAME}-device-startup
-)
 
 # NOTE: If you try to use get_target_property to store properties 
 #       like COMPILE_DEFINITIONS for device in a variable and then
