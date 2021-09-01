@@ -17,10 +17,7 @@ target_link_libraries(${PROJECT_NAME}-device-startup
         ${PROJECT_NAME}-device-vendor-config
 )
 
-target_link_libraries(${PROJECT_NAME}-device-peripherals 
-    PUBLIC 
-        ${PROJECT_NAME}-device-startup
-)
+
 
 # Driver interface should inherit this as PUBLIC
 add_library(${PROJECT_NAME}-device-build-deps INTERFACE)
