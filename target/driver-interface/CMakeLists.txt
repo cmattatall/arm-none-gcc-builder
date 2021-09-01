@@ -15,3 +15,8 @@ target_sources(${PROJECT_NAME}-driver-interface
         ${CMAKE_CURRENT_SOURCE_DIR}/src/DI_uart.c
 )
 
+
+target_link_libraries(${PROJECT_NAME}-driver-interface 
+    PRIVATE
+        ${PROJECT_NAME}-device-select
+)

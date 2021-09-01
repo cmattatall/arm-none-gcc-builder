@@ -15,7 +15,6 @@ add_library(${PROJECT_NAME}-device-vendor-config INTERFACE)
 target_compile_definitions(${PROJECT_NAME}-device-vendor-config
     INTERFACE 
         STM32F411xE
-        STM32
 )
 
 target_include_directories(${PROJECT_NAME}-device-vendor-config

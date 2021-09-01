@@ -54,40 +54,40 @@ if __name__ == "__main__":
     parser.add_argument("--cross", action="store_true", dest="crosscompiling", help="Option to cross compile")
     parser.add_argument("--release", action="store_true", dest="release_build", help="Build the project as a release build")
     parser.add_argument("--clean", action="store_true", dest="build_clean", help="Rebuild the entire project from source")
-    parser.add_argument("--build_tree", action="store", default="build", dest="build_tree", help="Path to the root of the generated build tree")
+    parser.add_argument("--build_dir", action="store", default="build", dest="build_dir", help="Path to the root of the generated build tree")
 
     args = parser.parse_args()
-    build_tree_dir = args.build_tree
+    build_dir = args.build_dir
 
-    configure_command = "cmake -S . -B %s " % (build_tree_dir)
-    build_command = "cmake --build %s " % (build_tree_dir)
+    configure_command = "cmake -S . -B %s " % (build_dir)
+    build_command = "cmake --build %s " % (build_dir)
 
     build_tree_cleaned = False
     if(args.crosscompiling):
         configure_command += " %s " % ("--toolchain=cmake/toolchains/arm-none-eabi-gcc-toolchain.cmake")
 
-        if not wasPreviousBuildCrossCompiled(build_tree_dir):
+        if not wasPreviousBuildCrossCompiled(build_dir):
             # We have to do a complete rebuild because every binary
             # object was compiled for a different arch
-            cleanCmakeBuildTree(build_tree_dir)
+            cleanCmakeBuildTree(build_dir)
             build_tree_cleaned = True
     else:
-        if wasPreviousBuildCrossCompiled(build_tree_dir):
+        if wasPreviousBuildCrossCompiled(build_dir):
             # We have to do a complete rebuild because every binary
             # object was compiled for a different arch
-            cleanCmakeBuildTree(build_tree_dir)
+            cleanCmakeBuildTree(build_dir)
             build_tree_cleaned = True
 
     if(args.build_clean):
         if not build_tree_cleaned:
-            cleanCmakeBuildTree(build_tree_dir)
+            cleanCmakeBuildTree(build_dir)
 
     if(args.release_build):
         configure_command += " %s " % ("-DPRODUCTION=1")
     else:
         configure_command += " %s " % ("-DPRODUCTION=0 -DCMAKE_BUILD_TYPE=Debug")
 
-    assert(build_tree_dir != None)
+    assert(build_dir != None)
 
     os.system(configure_command)
     os.system(build_command)

@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.21)
 if(CMAKE_CROSSCOMPILING)
     
     add_subdirectory(device)
+    add_subdirectory(device-select)
     add_subdirectory(driver-interface)
 
 
@@ -10,7 +11,7 @@ if(CMAKE_CROSSCOMPILING)
         PUBLIC
             ${PROJECT_NAME}-device-build-deps
         PRIVATE
-            ${PROJECT_NAME}-device-interface
+            ${PROJECT_NAME}-device
     )
 
     add_library(${PROJECT_NAME}-driver-build-deps INTERFACE)
