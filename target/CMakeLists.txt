@@ -11,7 +11,7 @@ if(CMAKE_CROSSCOMPILING)
         PUBLIC
             ${PROJECT_NAME}-device-build-deps
         PRIVATE
-            ${PROJECT_NAME}-device-interface
+            ${PROJECT_NAME}-device
     )
 
     add_library(${PROJECT_NAME}-driver-build-deps INTERFACE)
