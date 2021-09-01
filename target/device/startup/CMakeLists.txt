@@ -22,5 +22,6 @@ target_include_directories(${PROJECT_NAME}-device-startup
 target_link_libraries(${PROJECT_NAME}-device-startup 
     PUBLIC 
         ${PROJECT_NAME}-device-cpu
+    PRIVATE
         ${PROJECT_NAME}-device-vendor-config
 )
