@@ -108,7 +108,10 @@ target_sources(${PROJECT_NAME}-device-peripherals
 )
 
 
-
+target_link_libraries(${PROJECT_NAME}-device-peripherals 
+    PUBLIC 
+        ${PROJECT_NAME}-device-startup
+)
 
 
 
