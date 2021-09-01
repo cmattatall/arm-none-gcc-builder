@@ -18,8 +18,6 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/utils.cmake)
 message("")
 message("")
 
-
-
 if(PRODUCTION)
 
     message(STATUS "Building project: \"${PROJECT_NAME}\" for production.")
@@ -27,25 +25,11 @@ if(PRODUCTION)
     set(CMAKE_BUILD_TYPE MinSizeRel)
 
     set(CMAKE_C_FLAGS_MINSIZEREL
-        "\
-        ${CMAKE_C_FLAGS_MINSIZEREL} \
-        -ffunction-sections \
-        -fdata-sections \
-        -flto \
-        -ffat-lto-objects \
-        -fuse-linker-plugin \
-        "
+        "${CMAKE_C_FLAGS_MINSIZEREL} -ffunction-sections -fdata-sections -flto -ffat-lto-objects -fuse-linker-plugin"
     )
 
     set(CMAKE_CXX_FLAGS_MINSIZEREL 
-        "\         
-        ${CMAKE_CXX_FLAGS_MINSIZEREL} \
-        -ffunction-sections \
-        -fdata-sections \
-        -flto \
-        -ffat-lto-objects \
-        -fuse-linker-plugin \
-        "
+        "${CMAKE_CXX_FLAGS_MINSIZEREL} -ffunction-sections -fdata-sections -flto -ffat-lto-objects -fuse-linker-plugin"
     )
 
 else()

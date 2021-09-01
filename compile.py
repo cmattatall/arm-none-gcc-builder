@@ -168,22 +168,36 @@ if __name__ == "__main__":
 
     os.system("docker exec -t %s mkdir -p \"%s\"" % (container, str(posixCurrentDirPathObj)))
 
-    if nativeBuildDirPathObj.exists() and rebuild == False:
-        print("\n copying existing cmake build tree back into docker container \n")
-        os.system("docker cp \"%s\" %s:\"%s\"" % (str(nativeBuildDirPathObj), container, str(posixCurrentDirPathObj)))
+    
+    #if nativeBuildDirPathObj.exists() and rebuild == False:
+    #    print("\n copying existing cmake build tree back into docker container \n")
+    #    os.system("docker cp \"%s\" %s:\"%s\"" % (str(nativeBuildDirPathObj), container, str(posixCurrentDirPathObj)))
 
     # Build the firmware
     os.system("docker cp \"%s\" %s:\"%s\"" % (nativeSourceDirPathObj, container, str(posixCurrentDirPathObj)))
 
     
-    project_build_string="python3 ./%s/build.py --cross" % (scripts_dir)
+    # CROSS DEBUG 
+    project_build_string="python3 ./%s/build.py --cross --build_dir %s/cross/debug" % (scripts_dir, posixBuildDirPathObj)
     os.system("docker exec -t -w \"%s\" %s %s" % (str(posixCurrentDirPathObj), container, project_build_string))
 
-    # after build, copy built-objects out of container
+    # CROSS RELEASE
+    project_build_string="python3 ./%s/build.py --cross --release --build_dir %s/cross/release" % (scripts_dir, posixBuildDirPathObj)
+    os.system("docker exec -t -w \"%s\" %s %s" % (str(posixCurrentDirPathObj), container, project_build_string))
+
+    # HOST DEBUG 
+    project_build_string="python3 ./%s/build.py --build_dir %s/host/debug" % (scripts_dir, posixBuildDirPathObj)
+    os.system("docker exec -t -w \"%s\" %s %s" % (str(posixCurrentDirPathObj), container, project_build_string))
+
+    # HOST RELEASE
+    project_build_string="python3 ./%s/build.py --release --build_dir %s/host/release" % (scripts_dir, posixBuildDirPathObj)
+    os.system("docker exec -t -w \"%s\" %s %s" % (str(posixCurrentDirPathObj), container, project_build_string))
+
+
+    # After build, copy the build tree back into the host environment so dev has intellisense and all that stuff
     print("Copying docker build tree back into host system ...")
     os.system("docker cp %s:\"%s\" \"%s\"" % (container, str(posixCurrentDirPathObj/posixBuildDirPathObj), str(nativeCurrentDirPathObj)))
     print("ok")
-
     docker_container_cleanup(container)
 
 
