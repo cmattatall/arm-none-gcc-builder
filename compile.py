@@ -169,9 +169,9 @@ if __name__ == "__main__":
     os.system("docker exec -t %s mkdir -p \"%s\"" % (container, str(posixCurrentDirPathObj)))
 
     
-    #if nativeBuildDirPathObj.exists() and rebuild == False:
-    #    print("\n copying existing cmake build tree back into docker container \n")
-    #    os.system("docker cp \"%s\" %s:\"%s\"" % (str(nativeBuildDirPathObj), container, str(posixCurrentDirPathObj)))
+    if nativeBuildDirPathObj.exists() and rebuild == False:
+        print("\n copying existing cmake build tree back into docker container \n")
+        os.system("docker cp \"%s\" %s:\"%s\"" % (str(nativeBuildDirPathObj), container, str(posixCurrentDirPathObj)))
 
     # Build the firmware
     os.system("docker cp \"%s\" %s:\"%s\"" % (nativeSourceDirPathObj, container, str(posixCurrentDirPathObj)))
