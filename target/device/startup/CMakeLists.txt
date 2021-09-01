@@ -18,3 +18,10 @@ target_include_directories(${PROJECT_NAME}-device-startup
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include>
 )
 
+
+target_link_libraries(${PROJECT_NAME}-device-startup 
+    PUBLIC 
+        ${PROJECT_NAME}-device-cpu-core
+        ${PROJECT_NAME}-device-cpu-flags
+        ${PROJECT_NAME}-device-vendor-config
+)
