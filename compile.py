@@ -174,12 +174,12 @@ if __name__ == "__main__":
 
     # Build the firmware
     os.system("docker cp \"%s\" %s:\"%s\"" % (nativeSourceDirPathObj, container, str(posixCurrentDirPathObj)))
+
     
-    project_build_string="python3 ./%s/build.py" % (scripts_dir)
+    project_build_string="python3 ./%s/build.py --cross" % (scripts_dir)
     os.system("docker exec -t -w \"%s\" %s %s" % (str(posixCurrentDirPathObj), container, project_build_string))
 
     # after build, copy built-objects out of container
-
     print("Copying docker build tree back into host system ...")
     os.system("docker cp %s:\"%s\" \"%s\"" % (container, str(posixCurrentDirPathObj/posixBuildDirPathObj), str(nativeCurrentDirPathObj)))
     print("ok")
