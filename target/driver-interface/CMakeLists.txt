@@ -17,6 +17,11 @@ target_sources(${PROJECT_NAME}-driver-interface
 
 
 target_link_libraries(${PROJECT_NAME}-driver-interface 
+    PUBLIC
+        ${PROJECT_NAME}-device-cpu
+    INTERFACE
+        ${PROJECT_NAME}-device-cpu
     PRIVATE
         ${PROJECT_NAME}-device-select
+        ${PROJECT_NAME}-device
 )

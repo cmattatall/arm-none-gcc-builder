@@ -21,7 +21,6 @@ target_include_directories(${PROJECT_NAME}-device-startup
 
 target_link_libraries(${PROJECT_NAME}-device-startup 
     PUBLIC 
-        ${PROJECT_NAME}-device-cpu-core
-        ${PROJECT_NAME}-device-cpu-flags
+        ${PROJECT_NAME}-device-cpu
         ${PROJECT_NAME}-device-vendor-config
 )

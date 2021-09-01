@@ -22,8 +22,6 @@ if(CMAKE_CROSSCOMPILING)
     target_link_libraries(${PROJECT_NAME}-middleware
         PRIVATE
             ${PROJECT_NAME}-driver-interface
-        PUBLIC
-            ${PROJECT_NAME}-driver-build-deps
     )
 
     # We need to signal to the preprocessor which header to include and this 

@@ -10,20 +10,6 @@ add_subdirectory(cpu)
 add_subdirectory(startup)
 add_subdirectory(peripherals)
 
-
-
-
-
-# Driver interface should inherit this as PUBLIC
-
-#[[
-add_library(${PROJECT_NAME}-device-build-deps INTERFACE)
-target_link_libraries(${PROJECT_NAME}-device-build-deps
-    INTERFACE
-        ${PROJECT_NAME}-device-cpu-flags
-)
-#]]
-
 # Driver interface should inherit this as PRIVATE
 add_library(${PROJECT_NAME}-device INTERFACE)
 target_link_libraries(${PROJECT_NAME}-device

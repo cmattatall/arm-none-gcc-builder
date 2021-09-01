@@ -5,3 +5,12 @@ endif(NOT CMAKE_CROSSCOMPILING)
 
 add_subdirectory(core)
 add_subdirectory(flags)
+
+
+add_library(${PROJECT_NAME}-device-cpu INTERFACE)
+
+target_link_libraries(${PROJECT_NAME}-device-cpu 
+    INTERFACE
+        ${PROJECT_NAME}-device-cpu-core
+        ${PROJECT_NAME}-device-cpu-flags
+)
