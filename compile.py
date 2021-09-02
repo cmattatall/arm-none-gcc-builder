@@ -59,6 +59,35 @@ def docker_container_cleanup(container):
     os.system("docker container rm %s" % (container))
     print("ok")
 
+def build_in_docker(build_root, build_script, container, cross=False, release=False, ):
+    build_dir = build_root
+    build_command="python3 %s" % (build_script)
+
+    if(cross):
+        build_command += " %s " % ("--cross")
+        build_dir += os.sep + "cross"
+    else:
+        build_dir += os.sep + "host"
+    
+    if(release):
+        build_command += " %s " % ("--release")
+        build_dir += os.sep + "release"
+    else:
+        build_dir += os.sep + "debug"
+
+    build_command += " --build_dir %s " % (build_dir)
+
+    print("build_command = %s " % (build_command))
+
+    if os.path.exists(build_dir):
+        if(os.path.isdir(build_dir)):
+            print("Copying build tree %s into docker container %s before building object deltas... " % (build_dir, container))
+            # TODO: copy build tree into the docker container so we don't have to do a clean rebuild
+
+    os.system(build_command)
+
+
+
 # This updates the vscode intellisense file compile_commands.json emitted in the docker container 
 # to work on the native path
 # the compiler toolchain arm-none-eabi-gcc should be present in the user's PATH (absolute, executable, hardlink, or symlink)
@@ -176,6 +205,15 @@ if __name__ == "__main__":
     # Build the firmware
     os.system("docker cp \"%s\" %s:\"%s\"" % (nativeSourceDirPathObj, container, str(posixCurrentDirPathObj)))
 
+
+    build_in_docker("build", "scripts/build.py", container, cross=False, release=False)
+    build_in_docker("build", "scripts/build.py", container, cross=False, release=True)
+
+    build_in_docker("build", "scripts/build.py", container, cross=True, release=False)
+    build_in_docker("build", "scripts/build.py", container, cross=True, release=True)
+
+
+'''
     
     # CROSS DEBUG 
     project_build_string="python3 ./%s/build.py --cross --build_dir %s/cross/debug" % (scripts_dir, posixBuildDirPathObj)
@@ -199,10 +237,14 @@ if __name__ == "__main__":
     os.system("docker cp %s:\"%s\" \"%s\"" % (container, str(posixCurrentDirPathObj/posixBuildDirPathObj), str(nativeCurrentDirPathObj)))
     print("ok")
     docker_container_cleanup(container)
+'''
+    
 
 
+'''
     ## THIS NEXT SECTION IS MODIFYING THE EXPORTED JSON SO THAT INTELLISENSE WORKS ON THE NATIVE PLATFORM
     nativeCompileCommandsPathObj = nativeBuildDirPathObj/pathlib.Path("compile_commands.json")
     oldPath = str(posixCurrentDirPathObj)
     newPath = nativeCurrentDirPathObj.drive + oldPath
     update_intellisense(nativeCompileCommandsPathObj, oldPath, newPath)
+'''
