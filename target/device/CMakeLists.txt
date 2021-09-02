@@ -7,8 +7,11 @@ endif(NOT CMAKE_CROSSCOMPILING)
 # ARCHITECTED THEIR SOFTWARE, THERE MAY BE CIRCULAR DEPENDENCIES OTHERWISE
 add_subdirectory(vendor-config)
 add_subdirectory(cpu)
+add_subdirectory(linker)
 add_subdirectory(startup)
 add_subdirectory(peripherals)
+
+target_link_libraries(${PROJECT_NAME}-device-cpu INTERFACE ${PROJECT_NAME}-linker-script)
 
 
 # NOTE: If you try to use get_target_property to store properties 

@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.21)
 
 if(CMAKE_CROSSCOMPILING)
 
-    add_subdirectory(linker)
     add_subdirectory(device)
     add_subdirectory(device-select)
     add_subdirectory(driver-interface)
