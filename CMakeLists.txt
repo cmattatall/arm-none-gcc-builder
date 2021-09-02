@@ -58,6 +58,8 @@ include(CTest)
 add_subdirectory(tests)
 
 
+include(cmake/cppcheck.cmake)
+
 if(${CMAKE_VERSION} VERSION_GREATER "3.21.0")
     set(DOT_EXECUTABLE dot)
     find_program(DOT_EXE_PATH "${DOT_EXECUTABLE}${CMAKE_EXECUTABLE_SUFFIX}")
