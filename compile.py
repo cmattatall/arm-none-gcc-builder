@@ -116,14 +116,7 @@ def copy_build_tree_to_docker(container, build_dir):
 
 def copy_source_tree_to_docker(container, source_dir):
     docker_source_dir_object = docker_get_path_object(source_dir)
-    docker_build_dir_object = docker_get_path_object(build_dir)
-    docker_source_dir_str = str(docker_source_dir_object)
-    docker_build_dir_str = str(docker_build_dir_object)
     copy_dir_to_docker(container, source_dir)
-    if docker_source_dir_object in docker_build_dir_object.parents:
-        print("\nBuild tree %s is a subdirectory of source tree %s. Removing...\n" % (docker_build_dir_str, docker_source_dir_str))
-        os.system("docker exec -t \"%s\" rm -rf %s" % (container, docker_build_dir_str))
-
 
 def copy_build_tree_from_docker(container, build_dir):
     copy_dir_from_docker(container, build_dir)
