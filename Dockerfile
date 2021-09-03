@@ -17,4 +17,3 @@ RUN wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.07/g
 RUN tar -xvf gcc-arm-none-eabi-10.3-2021.07-x86_64-linux.tar.bz2
 RUN echo "export PATH=$PATH:gcc-arm-none-eabi-10.3-2021.07/bin" >> ~/.bashrc
 RUN apt-get install -y python3 python3-pip graphviz
-
