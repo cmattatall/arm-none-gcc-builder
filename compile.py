@@ -74,7 +74,7 @@ def docker_get_path_object(dir):
     return posixDirObj
 
 
-def docker_mirror_workdir(container):
+def docker_create_workdir(container):
     current_dir = os.getcwd()
     docker_current_dir_object = docker_get_path_object(current_dir)
     docker_current_dir_str = str(docker_current_dir_object)
@@ -127,7 +127,7 @@ def docker_build_project(source_dir, build_root, build_script, container, cross=
     docker_build_script_path_str = str(docker_build_script_path_object)
     build_command="python3 %s" % (docker_build_script_path_str)
     
-    docker_mirror_workdir(container)
+    docker_create_workdir(container)
     copy_source_tree_to_docker(container, source_dir)
     
     arch_dir=None
@@ -258,9 +258,9 @@ if __name__ == "__main__":
     docker_container_reset(container, docker_tag)
 
     docker_build_project(source_dir, build_dir, "scripts/build.py", container, cross=False, release=False)
-    #docker_build_project(source_dir, build_dir, "scripts/build.py", container, cross=False, release=True)
-    #docker_build_project(source_dir, build_dir, "scripts/build.py", container, cross=True, release=False)
-    #docker_build_project(source_dir, build_dir, "scripts/build.py", container, cross=True, release=True)
+    docker_build_project(source_dir, build_dir, "scripts/build.py", container, cross=False, release=True)
+    docker_build_project(source_dir, build_dir, "scripts/build.py", container, cross=True, release=False)
+    docker_build_project(source_dir, build_dir, "scripts/build.py", container, cross=True, release=True)
 
     
 
