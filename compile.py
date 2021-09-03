@@ -102,11 +102,11 @@ def copy_dir_from_docker(container, dir):
     docker_dir_str = str(docker_dir_object)
     dir_abs = os.path.abspath(dir)
     print("Copying directory %s from docker container to local machine as %s" % (docker_dir_str, dir_abs))
-
-    native_output_dir_object = pathlib.Path(dir_abs)
+    native_output_dir_object = pathlib.Path(dir_abs).parent
+    native_output_dir_str = str(native_output_dir_object)
     if not native_output_dir_object.exists():
-        pathlib.Path(dir_abs).mkdir(parents=True, exist_ok=True)
-    os.system("docker cp %s:\"%s\" \"%s\"" % (container, docker_dir_str, dir_abs))
+        pathlib.Path(str(native_output_dir_object)).mkdir(parents=True, exist_ok=True)
+    os.system("docker cp %s:\"%s\" %s" % (container, docker_dir_str, native_output_dir_str))
 
 
 def copy_build_tree_to_docker(container, build_dir):
@@ -120,7 +120,6 @@ def copy_source_tree_to_docker(container, source_dir):
     docker_source_dir_str = str(docker_source_dir_object)
     docker_build_dir_str = str(docker_build_dir_object)
     copy_dir_to_docker(container, source_dir)
-
     if docker_source_dir_object in docker_build_dir_object.parents:
         print("\nBuild tree %s is a subdirectory of source tree %s. Removing...\n" % (docker_build_dir_str, docker_source_dir_str))
         os.system("docker exec -t \"%s\" rm -rf %s" % (container, docker_build_dir_str))
