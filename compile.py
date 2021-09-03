@@ -86,6 +86,8 @@ def copy_dir_to_docker(container, dir):
         if os.path.isdir(dir):
             docker_dir_object = docker_get_path_object(dir)
             docker_dir_str = str(docker_dir_object)
+            dir_abs = os.path.abspath(dir)
+            print("Copying directory %s on local machine to docker container as %s" % (dir_abs, docker_dir_str))
             os.system("docker cp \"%s\" %s:\"%s\"" % (dir, container, docker_dir_str))
         else:
             print("Error: dir %s exists but is not a directory" % (dir))
@@ -99,7 +101,12 @@ def copy_dir_from_docker(container, dir):
     docker_dir_object = docker_get_path_object(dir)
     docker_dir_str = str(docker_dir_object)
     dir_abs = os.path.abspath(dir)
-    os.system("docker cp %s:\"%s\" %s" % (container, docker_dir_str, dir_abs))
+    print("Copying directory %s from docker container to local machine as %s" % (docker_dir_str, dir_abs))
+
+    native_output_dir_object = pathlib.Path(dir_abs)
+    if not native_output_dir_object.exists():
+        pathlib.Path(dir_abs).mkdir(parents=True, exist_ok=True)
+    os.system("docker cp %s:\"%s\" \"%s\"" % (container, docker_dir_str, dir_abs))
 
 
 def copy_build_tree_to_docker(container, build_dir):
@@ -120,13 +127,10 @@ def copy_source_tree_to_docker(container, source_dir):
 
 
 def copy_build_tree_from_docker(container, build_dir):
-    print("Copying build tree %s from docker container to local machine" % (build_dir))
     copy_dir_from_docker(container, build_dir)
 
 
 def docker_build_project(source_dir, build_root, build_script, container, cross=False, release=False, ):
-    build_dir = build_root
-
     docker_build_script_path_object = docker_get_path_object(build_script)
     docker_build_script_path_str = str(docker_build_script_path_object)
     build_command="python3 %s" % (docker_build_script_path_str)
@@ -147,29 +151,26 @@ def docker_build_project(source_dir, build_root, build_script, container, cross=
         config_dir = "release"
     else:
         config_dir = "debug"
-    build_dir = os.path.join(build_root, arch_dir, config_dir)
-
-    docker_build_dir_object = docker_get_path_object(build_dir)
+    native_build_dir = os.path.abspath(os.path.join(build_root, arch_dir, config_dir))
+    docker_build_dir_object = docker_get_path_object(native_build_dir)
     docker_build_dir_str = str(docker_build_dir_object)
     build_command += " --build_dir %s " % (docker_build_dir_str)
 
     print("build_command = %s " % (build_command))
 
-    if os.path.exists(build_dir):
-        if(os.path.isdir(build_dir)):
-            print("Copying build tree %s into docker container %s before building object deltas... " % (build_dir, container))
-            copy_build_tree_to_docker(container, build_dir)
+    if os.path.exists(native_build_dir):
+        if(os.path.isdir(native_build_dir)):
+            print("Copying build tree %s into docker container %s before building object deltas... " % (native_build_dir, container))
+            copy_build_tree_to_docker(container, native_build_dir)
 
     docker_source_dir_object = docker_get_path_object(source_dir)
     docker_source_dir_str = str(docker_source_dir_object)
     build_command += " --source_dir %s " % (docker_source_dir_str)
     
-    
-    os.system("docker exec -t \"%s\" %s" % (container, build_command))
+    os.system("docker exec -t %s %s" % (container, build_command))
 
-    #os.system("docker exec -t \"%s\" ls %s/build" % (container, docker_source_dir_str))
-        
-    copy_build_tree_from_docker(container, build_dir)
+    print("\nBuild succeeded. Exporting artifacts from docker container...")
+    copy_build_tree_from_docker(container, native_build_dir)
     
 
 
