@@ -9,10 +9,12 @@ import json
 import subprocess
 import signal
 
+
 def crtl_c_exit(sig, frame):
     print('You pressed Ctrl+C! Exiting')
     sys.exit(0)
 signal.signal(signal.SIGINT, crtl_c_exit)
+
 
 def checkPythonVersion():
     if sys.version_info.major < 3: # python 3 must be the runtime
@@ -47,7 +49,9 @@ def query_yes_no(question, default="yes"):
         else:
             sys.stdout.write("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
 
+
 def docker_container_reset(container, container_tag):
+    print("resetting docker container %s with name %s" % (container, container_tag))
     os.system("docker container stop %s" % (container))
     os.system("docker container rm %s " % (container))
     os.system("docker create -it --name %s %s" % (container, container_tag))
@@ -60,9 +64,75 @@ def docker_container_cleanup(container):
     os.system("docker container rm %s" % (container))
     print("ok")
 
-def docker_build_project(build_root, build_script, container, cross=False, release=False, ):
+
+
+def docker_get_path_object(dir):
+    dir_abs = os.path.abspath(dir)
+    nativeDirObj = pathlib.Path(str(dir_abs))
+    posixDirObj = pathlib.PurePosixPath((nativeDirObj.root/(nativeDirObj.relative_to(nativeDirObj.anchor))).as_posix())
+    posixDirObj = pathlib.PurePosixPath(pathlib.PurePosixPath(str(posixDirObj)).as_posix().replace(' ', ' ').lstrip().rstrip())
+    return posixDirObj
+
+
+def docker_mirror_workdir(container):
+    current_dir = os.getcwd()
+    docker_current_dir_object = docker_get_path_object(current_dir)
+    docker_current_dir_str = str(docker_current_dir_object)
+    os.system("docker exec -t %s mkdir -p \"%s\"" % (container, docker_current_dir_str))
+
+
+def copy_dir_to_docker(container, dir):
+    if os.path.exists(dir):
+        if os.path.isdir(dir):
+            docker_dir_object = docker_get_path_object(dir)
+            docker_dir_str = str(docker_dir_object)
+            os.system("docker cp \"%s\" %s:\"%s\"" % (dir, container, docker_dir_str))
+        else:
+            print("Error: dir %s exists but is not a directory" % (dir))
+            exit(-1)
+    else:
+        print("Error: dir %s does not exist" % (dir))
+        exit(-1)
+
+
+def copy_dir_from_docker(container, dir):
+    docker_dir_object = docker_get_path_object(dir)
+    docker_dir_str = str(docker_dir_object)
+    dir_abs = os.path.abspath(dir)
+    os.system("docker cp %s:\"%s\" %s" % (container, docker_dir_str, dir_abs))
+
+
+def copy_build_tree_to_docker(container, build_dir):
+    print("Copying build tree %s from local machine to docker container" % (build_dir))
+    copy_dir_to_docker(container, build_dir)
+
+
+def copy_source_tree_to_docker(container, source_dir):
+    docker_source_dir_object = docker_get_path_object(source_dir)
+    docker_build_dir_object = docker_get_path_object(build_dir)
+    docker_source_dir_str = str(docker_source_dir_object)
+    docker_build_dir_str = str(docker_build_dir_object)
+    copy_dir_to_docker(container, source_dir)
+
+    if docker_source_dir_object in docker_build_dir_object.parents:
+        print("\nBuild tree %s is a subdirectory of source tree %s. Removing...\n" % (docker_build_dir_str, docker_source_dir_str))
+        os.system("docker exec -t \"%s\" rm -rf %s" % (container, docker_build_dir_str))
+
+
+def copy_build_tree_from_docker(container, build_dir):
+    print("Copying build tree %s from docker container to local machine" % (build_dir))
+    copy_dir_from_docker(container, build_dir)
+
+
+def docker_build_project(source_dir, build_root, build_script, container, cross=False, release=False, ):
     build_dir = build_root
-    build_command="python3 %s" % (build_script)
+
+    docker_build_script_path_object = docker_get_path_object(build_script)
+    docker_build_script_path_str = str(docker_build_script_path_object)
+    build_command="python3 %s" % (docker_build_script_path_str)
+    
+    docker_mirror_workdir(container)
+    copy_source_tree_to_docker(container, source_dir)
     
     arch_dir=None
     config_dir=None
@@ -78,38 +148,33 @@ def docker_build_project(build_root, build_script, container, cross=False, relea
     else:
         config_dir = "debug"
     build_dir = os.path.join(build_root, arch_dir, config_dir)
-    build_command += " --build_dir %s " % (build_dir)
+
+    docker_build_dir_object = docker_get_path_object(build_dir)
+    docker_build_dir_str = str(docker_build_dir_object)
+    build_command += " --build_dir %s " % (docker_build_dir_str)
 
     print("build_command = %s " % (build_command))
 
     if os.path.exists(build_dir):
         if(os.path.isdir(build_dir)):
             print("Copying build tree %s into docker container %s before building object deltas... " % (build_dir, container))
-            os.system("docker cp \"%s\" %s" % (build_dir, container))
-            # TODO: copy build tree into the docker container so we don't have to do a clean rebuild
+            copy_build_tree_to_docker(container, build_dir)
 
-    print("NOT BUILDING BECAUSE COMMENTED OUT. FIX ME LATER")
-    #os.system(build_command)
-
-
-def docker_make_mirrored_host_build_dir(container):
-    # THIS NEXT SECTION IS LITERALLY JUST PATH WRANGLING SO THAT 
-    # WE CAN EXECUTE THE DOCKER BUILD AND HAVE INTELLISENSE WORK 
-    # IN A PLATFORM-AGNOSTIC MANNER
-    current_dir = os.getcwd()
-    nativeCurrentDirPathObj = pathlib.Path(current_dir)
+    docker_source_dir_object = docker_get_path_object(source_dir)
+    docker_source_dir_str = str(docker_source_dir_object)
+    build_command += " --source_dir %s " % (docker_source_dir_str)
     
-    posixCurrentDirPathObj = None
-    posixBuildDirPathObj = None
-    posixOutputDirPathObj = None
-    posixCurrentDirPathObj = pathlib.PurePosixPath((nativeCurrentDirPathObj.root/(nativeCurrentDirPathObj.relative_to(nativeCurrentDirPathObj.anchor))).as_posix())
-    posixCurrentDirPathObj = pathlib.PurePosixPath(pathlib.PurePosixPath(str(posixCurrentDirPathObj)).as_posix().replace(' ', ' ').lstrip().rstrip())
+    
+    os.system("docker exec -t \"%s\" %s" % (container, build_command))
 
-    posixBuildDirPathObj = pathlib.PurePosixPath((nativeBuildDirPathObj.root/(nativeBuildDirPathObj.relative_to(nativeBuildDirPathObj.anchor))).as_posix())
-    posixBuildDirPathObj = pathlib.PurePosixPath(pathlib.PurePosixPath(str(posixBuildDirPathObj)).as_posix().replace(' ', ' ').lstrip().rstrip())
-    os.system("docker exec -t %s mkdir -p \"%s\"" % (container, str(posixCurrentDirPathObj)))
+    #os.system("docker exec -t \"%s\" ls %s/build" % (container, docker_source_dir_str))
+        
+    copy_build_tree_from_docker(container, build_dir)
+    
 
 
+# COMMENTED OUT FOR NOW
+'''
 # This updates the vscode intellisense file compile_commands.json emitted in the docker container 
 # to work on the native path
 # the compiler toolchain arm-none-eabi-gcc should be present in the user's PATH (absolute, executable, hardlink, or symlink)
@@ -134,6 +199,10 @@ def update_intellisense(PathLibObject, old_dir, new_dir):
             print("%s exists but is NOT a file" % (str(PathLibObject)))
     else:
         print("%s does not exist so could not configure intellisense." % (str(PathLibObject)))
+'''
+
+
+
 
 if __name__ == "__main__":
     checkPythonVersion() 
@@ -149,16 +218,16 @@ if __name__ == "__main__":
     parser.add_argument("--source_dir", action="store", dest="source_dir", default=".", help="the name of the directory containing top-level CMakeLists.txt")
     parser.add_argument("--image_repo", action="store", dest="docker_repo", default="local_images", help="docker image repository to contain the docker image nametag")
     parser.add_argument("--image_tag", action="store", dest="docker_nametag", default="cmake_docker_build_image", help="the name of the docker image")
-    parser.add_argument("--image_rebuild", action="store_true", dest="image_rebuild", help="Option to rebuild the docker image from the dockerfile")
     parser.add_argument("--verbose", action="store", dest="build_verbose", default=False, help="Whether the build should be performed using a verbose makefile")
-    parser.add_argument("--overwrite", action="store", dest="overwrite", default=False, help="Ignore warning prompts when overwriting output and build directories")
+    parser.add_argument("--prompt_overwrite", action="store", dest="prompt_overwrite", default=False, help="Ignore warning prompts when overwriting output and build directories")
     parser.add_argument("--image", action="store", dest="image_file", default=None, help="instead of building a docker image, load a docker build image")
-    parser.add_argument("--clean", action="store", dest="rebuild", default=False, help="rebuild all source files instead of just deltas")
+    parser.add_argument("--clean", action="store", dest="build_clean", default=False, help="rebuild all source files instead of just deltas")
 
     # parse CLI args
     args = parser.parse_args()
-    nativeBuildDirPathObj  = pathlib.Path(args.build_dir)
-    nativeSourceDirPathObj = pathlib.Path(args.source_dir)
+    
+    build_dir = args.build_dir
+    source_dir = args.source_dir
 
     release_build = args.release_build
     docker_tag   = "%s:%s" % (args.docker_repo, args.docker_nametag)
@@ -166,104 +235,40 @@ if __name__ == "__main__":
     scripts_dir = "scripts"
     container = "cmake_build_container"
     build_verbose = args.build_verbose
-    overwrite = args.overwrite
+    prompt_overwrite = args.prompt_overwrite
     image_file = args.image_file
-    rebuild = args.rebuild
-    image_rebuild = args.image_rebuild
-
-    # validate CLI args
-    if not nativeSourceDirPathObj.exists():
-        print("[ERROR] source code directory %s does not exist" % (str(nativeSourceDirPathObj)))
-        exit(1)
-
-    if nativeBuildDirPathObj.exists():
-        if overwrite == False:
-            should_continue = query_yes_no("[WARNING] build directory: %s exists and will be overwritten post-build. Continue?" % (str(nativeBuildDirPathObj)), "yes")
-            if False == should_continue:
-                print("Aborting...")
-                exit(0)
-
-    nativeBuildDirPathObj = pathlib.Path(str(nativeBuildDirPathObj).replace(' ', '\ ').lstrip().rstrip())
-    nativeSourceDirPathObj = pathlib.Path(str(nativeSourceDirPathObj).replace(' ', '\ ').lstrip().rstrip())
+    build_clean = args.build_clean
 
     if image_file != None:
         os.system("docker load -i %s" % (image_file))  # load docker image from file
-    elif 0 != subprocess.call(["docker", "inspect", docker_tag]):
-        if True == query_yes_no("docker image %s does not exists on your system. Build from dockerfile?", "yes"):
-            os.system("docker build . -t %s" % (docker_tag)) # build docker image from scatch (or from cache)
-        elif True == query_yes_no("Would you like to provide the path to a prebuilt docker image file instead?", "yes"):
-            os.system("docker load -i %s" % (input("Enter the path to the docker image file:")))
-        else:
-            print("docker image %s will not be built from Dockerfile and does not exist on system. Build cannot continue")
-            exit (0)
-    elif image_rebuild:
+    else:
         os.system("docker build . -t %s" % (docker_tag)) # build docker image from scatch (or from cache)
 
 
+    # validate CLI args
+    if not os.path.exists(source_dir):
+        print("[ERROR] source path %s does not exist" % (str(source_dir)))
+        exit(1)
+    else:
+        if not os.path.isdir(source_dir):
+            print("[ERROR] source path %s exists but is not a directory " % (str(source_dir)))
+            exit(1)
+
+    if os.path.exists(build_dir):
+        if os.path.isdir(build_dir):
+            if prompt_overwrite:
+                should_continue = query_yes_no("[WARNING] build directory: %s exists and will be overwritten post-build. Continue?" % (build_dir), "yes")
+                if not should_continue:
+                    print("Aborting...")
+                    exit(0)
+
     docker_container_reset(container, docker_tag)
 
-    docker_make_mirrored_host_build_dir(container)
+    docker_build_project(source_dir, build_dir, "scripts/build.py", container, cross=False, release=False)
+    #docker_build_project(source_dir, build_dir, "scripts/build.py", container, cross=False, release=True)
+    #docker_build_project(source_dir, build_dir, "scripts/build.py", container, cross=True, release=False)
+    #docker_build_project(source_dir, build_dir, "scripts/build.py", container, cross=True, release=True)
 
-    '''
-    # THIS NEXT SECTION IS LITERALLY JUST PATH WRANGLING SO THAT 
-    # WE CAN EXECUTE THE DOCKER BUILD AND HAVE INTELLISENSE WORK IN A PLATFORM-AGNOSTIC MANNGER
-    current_dir = os.getcwd()
-    nativeCurrentDirPathObj = pathlib.Path(current_dir)
-    
-    posixCurrentDirPathObj = None
-    posixBuildDirPathObj = None
-    posixOutputDirPathObj = None
-    posixCurrentDirPathObj = pathlib.PurePosixPath((nativeCurrentDirPathObj.root/(nativeCurrentDirPathObj.relative_to(nativeCurrentDirPathObj.anchor))).as_posix())
-    posixCurrentDirPathObj = pathlib.PurePosixPath(pathlib.PurePosixPath(str(posixCurrentDirPathObj)).as_posix().replace(' ', ' ').lstrip().rstrip())
-
-    posixBuildDirPathObj = pathlib.PurePosixPath((nativeBuildDirPathObj.root/(nativeBuildDirPathObj.relative_to(nativeBuildDirPathObj.anchor))).as_posix())
-    posixBuildDirPathObj = pathlib.PurePosixPath(pathlib.PurePosixPath(str(posixBuildDirPathObj)).as_posix().replace(' ', ' ').lstrip().rstrip())
-
-    os.system("docker exec -t %s mkdir -p \"%s\"" % (container, str(posixCurrentDirPathObj)))
-    '''
-
-    
-    '''
-    if nativeBuildDirPathObj.exists() and rebuild == False:
-        print("\n copying existing cmake build tree back into docker container \n")
-        os.system("docker cp \"%s\" %s:\"%s\"" % (str(nativeBuildDirPathObj), container, str(posixCurrentDirPathObj)))
-
-    # Build the firmware
-    os.system("docker cp \"%s\" %s:\"%s\"" % (nativeSourceDirPathObj, container, str(posixCurrentDirPathObj)))
-
-
-    docker_build_project("build", "scripts/build.py", container, cross=False, release=False)
-    docker_build_project("build", "scripts/build.py", container, cross=False, release=True)
-
-    docker_build_project("build", "scripts/build.py", container, cross=True, release=False)
-    docker_build_project("build", "scripts/build.py", container, cross=True, release=True)
-    '''
-
-'''
-    
-    # CROSS DEBUG 
-    project_build_string="python3 ./%s/build.py --cross --build_dir %s/cross/debug" % (scripts_dir, posixBuildDirPathObj)
-    os.system("docker exec -t -w \"%s\" %s %s" % (str(posixCurrentDirPathObj), container, project_build_string))
-
-    # CROSS RELEASE
-    project_build_string="python3 ./%s/build.py --cross --release --build_dir %s/cross/release" % (scripts_dir, posixBuildDirPathObj)
-    os.system("docker exec -t -w \"%s\" %s %s" % (str(posixCurrentDirPathObj), container, project_build_string))
-
-    # HOST DEBUG 
-    project_build_string="python3 ./%s/build.py --build_dir %s/host/debug" % (scripts_dir, posixBuildDirPathObj)
-    os.system("docker exec -t -w \"%s\" %s %s" % (str(posixCurrentDirPathObj), container, project_build_string))
-
-    # HOST RELEASE
-    project_build_string="python3 ./%s/build.py --release --build_dir %s/host/release" % (scripts_dir, posixBuildDirPathObj)
-    os.system("docker exec -t -w \"%s\" %s %s" % (str(posixCurrentDirPathObj), container, project_build_string))
-
-
-    # After build, copy the build tree back into the host environment so dev has intellisense and all that stuff
-    print("Copying docker build tree back into host system ...")
-    os.system("docker cp %s:\"%s\" \"%s\"" % (container, str(posixCurrentDirPathObj/posixBuildDirPathObj), str(nativeCurrentDirPathObj)))
-    print("ok")
-    docker_container_cleanup(container)
-'''
     
 
 

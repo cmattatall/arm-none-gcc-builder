@@ -36,8 +36,6 @@ def wasPreviousBuildCrossCompiled(build_tree):
                         return True
         else:
             print("cmake_cache_file : %s is not a file." % (cmake_cache_file))
-    else:
-        print("build_tree: " + str(build_tree) + " is not a directory")
     return False
 
 def cleanCmakeBuildTree(build_tree):
@@ -55,11 +53,13 @@ if __name__ == "__main__":
     parser.add_argument("--release", action="store_true", dest="release_build", help="Build the project as a release build")
     parser.add_argument("--clean", action="store_true", dest="build_clean", help="Rebuild the entire project from source")
     parser.add_argument("--build_dir", action="store", default="build", dest="build_dir", help="Path to the root of the generated build tree")
+    parser.add_argument("--source_dir", action="store", required=True, dest="source_dir", help="Path to the cmake source tree")
 
     args = parser.parse_args()
     build_dir = args.build_dir
+    source_dir = args.source_dir
 
-    configure_command = "cmake -S . -B %s " % (build_dir)
+    configure_command = "cmake -S %s -B %s " % (source_dir, build_dir)
     build_command = "cmake --build %s " % (build_dir)
 
     build_tree_cleaned = False
